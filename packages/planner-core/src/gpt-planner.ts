@@ -7,6 +7,7 @@ import {
 } from "./prompt-builder.js";
 import { inputFilter, outputStaticCheck } from "./guardrails/index.js";
 import { CostLedger } from "./cost-ledger.js";
+import { ResponseCache, buildCacheKey } from "./response-cache.js";
 import { retryWithBackoff, createRecoveryLedger, type RecoveryEvent } from "./recovery.js";
 import { sendCompletion, type ChatMessage, type FetchLike } from "./transport.js";
 import {
@@ -23,6 +24,7 @@ export interface GPTPlannerDeps {
   skillpacks: readonly SkillManifest[];
   allowlistedComponents: readonly string[];
   costLedger?: CostLedger;
+  responseCache?: ResponseCache;
   fetchImpl?: FetchLike;
 }
 
@@ -59,15 +61,26 @@ function parseJsonObject(content: string): unknown {
 
 export class GPTPlanner implements Planner {
   private readonly costLedger: CostLedger;
+  private readonly responseCache: ResponseCache;
   private readonly fetchImpl?: FetchLike;
   private lastTrace: PlanTrace | null = null;
+  private lastCacheHit = false;
 
   constructor(
     private readonly config: GPTPlannerConfig,
     private readonly deps: GPTPlannerDeps
   ) {
     this.costLedger = deps.costLedger ?? new CostLedger({ modelTier: config.modelTier });
+    this.responseCache = deps.responseCache ?? new ResponseCache();
     this.fetchImpl = deps.fetchImpl;
+  }
+
+  getResponseCache(): ResponseCache {
+    return this.responseCache;
+  }
+
+  wasLastCacheHit(): boolean {
+    return this.lastCacheHit;
   }
 
   getCostLedger(): CostLedger {
@@ -111,7 +124,21 @@ export class GPTPlanner implements Planner {
     if (inputIssues.length > 0) {
       throw new GuardrailError(inputIssues);
     }
-    return this.runPipeline(prompt, triggerMode, context);
+
+    // Cache check
+    const cacheKey = buildCacheKey(prompt, context.currentPlan, context.dataSourceSnapshot);
+    const cached = this.responseCache.get(cacheKey);
+    if (cached) {
+      this.lastCacheHit = true;
+      return cached;
+    }
+    this.lastCacheHit = false;
+
+    const response = await this.runPipeline(prompt, triggerMode, context);
+
+    // Cache store
+    this.responseCache.set(cacheKey, response);
+    return response;
   }
 
   private async runPipeline(
