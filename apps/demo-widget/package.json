@@ -1,0 +1,16 @@
+{
+  "name": "@genui/demo-widget",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"demo-widget dev server TODO\"",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@genui/renderer-web": "workspace:*",
+    "@genui/widget-iframe": "workspace:*"
+  }
+}

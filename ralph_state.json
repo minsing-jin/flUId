@@ -1,0 +1,7 @@
+{
+  "loop_mode": "continuous",
+  "stop_conditions": ["no_todo_stories", "hard_failure"],
+  "current_story_id": null,
+  "last_run": "2026-02-22",
+  "failures": []
+}

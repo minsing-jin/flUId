@@ -1,0 +1,157 @@
+goal: >
+  Build GPT Spark M1 — a production-grade generative UI layer on top of the existing
+  flUId Workbench Framework. Replace MockPlanner with a real GPT-powered Planner that
+  directly emits validated UIPlan DSL (JSON mode) under strong guardrails, supports
+  three trigger modes (prompt, interactive patch evolution, data-feed polling),
+  intelligently selects and composes skillpacks, and makes UI visual design a
+  first-class decision by GPT through shadcn/ui-based theming.
+
+constraints:
+  - Must preserve existing Core runtime (DSL/validator/patches/bindings) without breaking API
+  - Planner must not generate executable code — only validated UIPlan DSL JSON
+  - All GPT output must pass zod schema validation, allowlist checks, permission gating, and unsafe-HTML detection before reaching the renderer
+  - Any dynamically introduced (non-allowlisted) widget type must render only inside an iframe sandbox with a restricted CSP
+  - iframe sandbox connect-src must be 'self' plus only the domains declared by selected skillpacks — no wildcard
+  - Host↔Sandbox bridge exposes only allowlist tools, scoped state (per-block), and a pub/sub event bus — no raw auth tokens, no routing control
+  - GPT planner must support dual transport: browser-direct BYOK and server proxy (via packages/planner-core adapter)
+  - Streaming GPT responses must be enabled by default to minimize TTFT
+  - Model tiering is mandatory — expensive model for full UIPlan generation, cheaper model for patch and feed-poll queries
+  - Daily token budget cap per session must be enforced (default 100k, 80% warning, 100% pauses feed polling)
+  - Zero usage of TypeScript `any` in core and planner-core
+  - No breaking change to widget-iframe postMessage protocol version (bump minor only)
+  - M1 must not depend on new backend infrastructure beyond an optional Node proxy — project remains primarily client-side
+  - shadcn/ui integration must be done through renderer-react as primary renderer; renderer-web stays as deprecated token-only fallback
+  - Visual quality must match or exceed Vercel json-render reference (shadcn component fidelity, dark/light, mood-adaptive theming)
+  - GPT Spark must never call a tool that is not in the runtime allowlist nor request permissions outside the permission allowlist
+  - CI test suite (pnpm typecheck, pnpm test, widget e2e) must continue to pass — new tests additive only
+
+acceptance_criteria:
+  - packages/planner-core exists and exports GPTPlanner implementing the existing Planner interface
+  - GPTPlanner supports transport='direct' (BYOK) and transport='proxy' options via a single configuration surface
+  - A single GPT call returns a structured object {selectedSkills, uiPlan, theme} validated by a dedicated zod schema
+  - UIPlan DSL is extended with theme.mood (serious|playful|minimal|vivid|dark), theme.density (compact|comfortable|spacious), theme.accent
+  - Streaming is enabled and demo-host shows progressive rendering of blocks as the plan arrives
+  - Mode 1 (prompt): A natural-language prompt (Korean or English) produces a full UIPlan rendered by renderer-react with shadcn components
+  - Mode 2 (patch evolution): User interaction on a generated block triggers GPT to return {mode:'patch'|'full', payload} and runtime correctly applies it via existing applyPatch
+  - Mode 3 (feed polling): A dataSource configured with polling interval refreshes data, Runtime detects change and calls GPT which returns a patch that updates the UI
+  - GPT intelligently selects and combines 2+ skillpacks in at least one demo scenario (e.g., data-research + geo-maps)
+  - Visual theme reflects prompt mood — demonstrably different theme between "thesis dashboard" and "weekend ledger" scenarios
+  - Layered error recovery verified — API failure retries 3x with exponential backoff then falls back to MockPlanner with a toast; zod failure triggers one self-heal retry; render failure isolates to a single ErrorPlaceholder block
+  - Three-layer prompt-injection defense in place — input pattern filter, GPT system-prompt refusal instructions, output static analysis (URL allowlist, suspicious key detection), plus zod validation
+  - Dynamic CSP assembly — iframe sandbox connect-src is computed at mount time from selected skillpack allowedDomains
+  - Session token budget enforced — reaching 80% shows a warning toast, 100% pauses mode-3 polling, current usage visible in a budget panel
+  - Built-in DevTools panel renders in dev mode with tabs for GPT request, GPT response (streaming), validation result, UIPlan snapshot history, patch diff viewer, and cumulative token/cost
+  - renderer-react is the primary renderer with 30+ shadcn-based components and supports full UIPlan rendering; renderer-web is marked deprecated but continues to accept design tokens
+  - demo-host runs with Vite dev server, ships a BYOK input form, and exposes the three-mode demo scenarios
+  - At least 10 use case demos are playable from demo-host, including mood comparison, interactive evolution, feed auto-generation, voice/text multi-modal input, smart feedback, live code-to-chart, presentation mode switch, Korean-English mixed input, multi-skillpack composition, and DevTools "Why this UI?" transparency
+  - Test suite adds GPTPlanner unit tests (mocked), three-mode e2e tests (playwright), and visual regression screenshots for shadcn token application
+  - Documentation set published under docs/ — gpt-spark-quickstart.md, architecture.md, security-guardrails.md, cost-control.md, devtools-panel.md, theme-customization.md, roadmap.md, plus CHANGELOG.md
+  - pnpm install, pnpm typecheck, pnpm test, and pnpm --filter @genui/widget-iframe run test:e2e all pass on a fresh clone
+  - A new PRD story block S016..S0NN in prd.json captures every M1 slice with acceptance_criteria and files
+
+ontology_name: GPTSparkRuntime
+ontology_description: >
+  Runtime state and message shape for the GPT-powered generative UI planner,
+  spanning the Planner call surface, the structured GPT response, the extended
+  UIPlan DSL, the sandbox bridge vocabulary, and the observability ledger.
+
+ontology_fields:
+  - name: plannerRequest
+    type: object
+    description: Input to GPTPlanner.plan — prompt, locale, context, currentPlan, dataSourceSnapshot, mode discriminator
+  - name: plannerResponse
+    type: object
+    description: Structured GPT output containing selectedSkills, uiPlan, theme, responseMode(patch|full), and optional patches array
+  - name: uiPlan
+    type: object
+    description: Existing UIPlan DSL extended with theme{mood,density,accent} and skillpackBinding metadata
+  - name: skillpackManifest
+    type: object
+    description: Existing SkillManifest extended with allowedDomains (string array) for dynamic CSP assembly
+  - name: sandboxBridgeMessage
+    type: object
+    description: Host↔Widget postMessage vocabulary extended with scoped-state get/set and pub/sub event topics
+  - name: guardrailResult
+    type: object
+    description: Output of the three-layer defense pipeline — injectionFiltered, systemPromptEnforced, staticAnalysisFindings, zodValidationResult
+  - name: costLedger
+    type: object
+    description: Session token budget state — used, limit, warningFired, pollingPaused, perCallRecords
+  - name: devToolsSnapshot
+    type: object
+    description: DevTools panel state — gptRequestRaw, gptResponseStream, validation, planHistory, patchDiffs, tokenTimeline
+  - name: errorRecoveryEvent
+    type: object
+    description: Recovery ledger entries — layer(api|validation|render), attempt, outcome, fallbackUsed
+  - name: transportConfig
+    type: object
+    description: GPTPlanner transport configuration — mode(direct|proxy), apiKeyRef, proxyUrl, model tiering map
+  - name: triggerMode
+    type: string
+    description: Which of the three modes fired this planner call — prompt | interaction | feedPoll
+  - name: themeDecision
+    type: object
+    description: GPT-chosen theme — mood, density, accent, rationale (for DevTools transparency)
+
+evaluation_principles:
+  - name: guardrail_integrity
+    description: All GPT output is validated through the full 3-layer defense plus zod before any render, and no unsafe escape path exists
+    weight: 0.20
+  - name: three_mode_coverage
+    description: Prompt, interactive patch, and feed-poll modes all ship working end-to-end with distinct demo scenarios
+    weight: 0.18
+  - name: visual_quality
+    description: Rendered UIs use shadcn/ui with mood-adaptive theming and are visually distinguishable for different prompt moods
+    weight: 0.15
+  - name: latency_streaming
+    description: GPT responses stream with progressive rendering, TTFT is minimized, and UI appears alive not frozen
+    weight: 0.10
+  - name: error_resilience
+    description: Layered recovery never leaves the user with a blank screen — fallback, self-heal, and block-level error placeholder all observable
+    weight: 0.10
+  - name: cost_control
+    description: Model tiering and budget cap are actually enforced, visible, and prevent runaway spend in mode 3 polling
+    weight: 0.08
+  - name: observability
+    description: Built-in DevTools surfaces every GPT call, validation, patch, and cost entry in real time for dev-mode debugging
+    weight: 0.08
+  - name: api_backward_compat
+    description: Existing Core runtime, widget-iframe protocol, and renderer adapters continue to work unchanged with additive extension only
+    weight: 0.06
+  - name: dx_and_docs
+    description: A fresh clone can run demo-host in under ten minutes using only docs/gpt-spark-quickstart.md and a BYOK key
+    weight: 0.05
+
+exit_conditions:
+  - name: all_ac_pass
+    description: Every acceptance criterion verified by test suite or manual demo
+    criteria: All AC items checked green in a verification pass
+  - name: ci_green
+    description: pnpm typecheck, pnpm test, and widget e2e all pass on a fresh clone
+    criteria: CI scripts exit code 0
+  - name: three_mode_demo
+    description: All three trigger modes demonstrable from demo-host without developer intervention
+    criteria: Modes 1, 2, 3 each have a saved prompt or preset in demo-host
+  - name: ten_use_cases_playable
+    description: The 10 use case demos listed in acceptance criteria can be triggered from a menu in demo-host
+    criteria: Each use case mapped to a starter prompt or scripted data
+  - name: documentation_complete
+    description: All documents in docs/ are present, consistent with code, and linked from README
+    criteria: File list matches — quickstart, architecture, security-guardrails, cost-control, devtools-panel, theme-customization, roadmap, CHANGELOG
+  - name: prd_updated
+    description: prd.json contains new stories S016..S0NN for every M1 slice with acceptance_criteria and files
+    criteria: prd.json parses and new stories have status fields and file lists
+
+metadata:
+  version: 1.0
+  project: flUId / GPT Spark
+  milestone: M1
+  created: 2026-04-10
+  interview_id: interview_20260407_075148
+  ambiguity_score: 0.15
+  seed_author: seed-architect (Path B fallback)
+  references:
+    - Vercel json-render (reference comparable)
+    - shadcn/ui design system
+    - CopilotKit Generative UI patterns (static/declarative/open-ended)
+    - MCP-UI / Open JSON UI / A2UI emerging specs

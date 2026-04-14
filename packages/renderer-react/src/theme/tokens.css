@@ -1,0 +1,53 @@
+/*
+ * GPT Spark base tokens — these are defaults; applyTheme() overrides them per plan.
+ * Import once from the consumer app so Shadcn-like primitives reference the same vars.
+ */
+:root {
+  --genui-bg: #f8fafc;
+  --genui-fg: #0f172a;
+  --genui-muted: #64748b;
+  --genui-border: #e2e8f0;
+  --genui-accent: #4f46e5;
+  --genui-accent-fg: #ffffff;
+  --genui-radius: 6px;
+  --genui-spacing: 1;
+  --genui-font-size: 14px;
+  --genui-font-family: "Inter", "Pretendard", system-ui, sans-serif;
+}
+
+.genui-react-workbench {
+  background: var(--genui-bg);
+  color: var(--genui-fg);
+  font-family: var(--genui-font-family);
+  font-size: var(--genui-font-size);
+  padding: calc(16px * var(--genui-spacing));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: calc(16px * var(--genui-spacing));
+  min-height: 100vh;
+}
+
+.genui-react-workbench > section {
+  background: var(--genui-bg);
+  color: var(--genui-fg);
+  border: 1px solid var(--genui-border);
+  border-radius: var(--genui-radius);
+  padding: calc(16px * var(--genui-spacing));
+}
+
+.genui-react-workbench h3 {
+  margin: 0 0 calc(8px * var(--genui-spacing)) 0;
+  font-weight: 600;
+  color: var(--genui-fg);
+}
+
+.genui-accent {
+  color: var(--genui-accent);
+}
+
+.genui-accent-bg {
+  background: var(--genui-accent);
+  color: var(--genui-accent-fg);
+  border-radius: var(--genui-radius);
+  padding: calc(4px * var(--genui-spacing)) calc(10px * var(--genui-spacing));
+}

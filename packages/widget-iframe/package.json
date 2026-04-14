@@ -1,0 +1,19 @@
+{
+  "name": "@genui/widget-iframe",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"Use pnpm --filter @genui/widget-iframe run test:e2e for Playwright\"",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@genui/core": "workspace:*",
+    "@genui/renderer-web": "workspace:*"
+  }
+}

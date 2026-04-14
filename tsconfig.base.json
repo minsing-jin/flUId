@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "baseUrl": ".",
+    "paths": {
+      "@genui/core": ["packages/core/src/index.ts"],
+      "@genui/renderer-web": ["packages/renderer-web/src/index.ts"],
+      "@genui/renderer-react": ["packages/renderer-react/src/index.ts"],
+      "@genui/widget-iframe": ["packages/widget-iframe/src/index.ts"],
+      "@genui/cli": ["packages/cli/src/index.ts"],
+      "@genui/planner-core": ["packages/planner-core/src/index.ts"]
+    }
+  }
+}

@@ -1,0 +1,535 @@
+{
+  "project": "Generative UI Workbench Framework",
+  "version": "1.0",
+  "loop_policy": {
+    "mode": "continuous",
+    "one_story_per_iteration": true
+  },
+  "stories": [
+    {
+      "id": "S001",
+      "title": "PRD artifacts 작성 (prd.md + 상세 prd.json)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "prd.md가 North Star, Non-negotiables, 아키텍처, DoD를 포함한다",
+        "prd.json에 P0/P1/P2 스토리가 구조화되어 있다",
+        "각 스토리는 id/title/acceptance_criteria/status/files를 가진다"
+      ],
+      "files": [
+        "prd.md",
+        "prd.json",
+        "progress.md",
+        "ralph_state.json"
+      ],
+      "notes": "현재 iteration"
+    },
+    {
+      "id": "S002",
+      "title": "TypeScript 모노레포 스캐폴드 (pnpm workspace + turbo)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "packages/, apps/, docs/ 구조가 생성된다",
+        "root package.json, pnpm-workspace.yaml, turbo.json, tsconfig.base.json이 존재한다",
+        "각 워크스페이스 패키지에 최소 package.json과 src 엔트리 파일이 존재한다"
+      ],
+      "files": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tsconfig.base.json",
+        "packages",
+        "apps",
+        "docs"
+      ]
+    },
+    {
+      "id": "S003",
+      "title": "core DSL v1 타입/스키마 + validator 구현",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "UIPlan/Block/Action/DataSource/Condition/PlanPatch 타입 정의",
+        "zod strict validation으로 unknown props/tool/component 거부",
+        "unsafe HTML 탐지 훅이 포함된다"
+      ],
+      "files": [
+        "packages/core/src/dsl"
+      ]
+    },
+    {
+      "id": "S004",
+      "title": "core runtime + registries + permission gate",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "WorkbenchRuntime, event log, action dispatcher가 동작한다",
+        "ComponentRegistry/ToolRegistry/SkillRegistry 인터페이스 구현",
+        "permission 미승인 툴 실행 시 차단된다"
+      ],
+      "files": [
+        "packages/core/src/runtime",
+        "packages/core/src/registry",
+        "packages/core/src/skills",
+        "packages/core/src/telemetry"
+      ]
+    },
+    {
+      "id": "S005",
+      "title": "bindings parser/resolver + patches apply/merge",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "{\"$bind\":\"state.x\"} 구문 해석",
+        "action input/props에 바인딩 해석 적용",
+        "add/remove/replace/move patch 연산 구현"
+      ],
+      "files": [
+        "packages/core/src/bindings",
+        "packages/core/src/patches"
+      ]
+    },
+    {
+      "id": "S006",
+      "title": "renderer-web baseline + P0 핵심 컴포넌트",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "WorkbenchShell/PromptInput/ActivityLog/PermissionGate/DebugJSON 렌더링",
+        "DataTable/ChartBlock/KPIGrid/SummaryBlock/WebResultsList/ComparisonMatrix 구현",
+        "CodeEditor/CodeRunnerJS/MapView/PipelineKanban baseline 구현"
+      ],
+      "files": [
+        "packages/renderer-web/src"
+      ]
+    },
+    {
+      "id": "S007",
+      "title": "core 컴포넌트 카탈로그 스키마/메타 등록 (전체 allowlist)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "요구된 컴포넌트 타입 전체가 core 카탈로그에 등록된다",
+        "각 타입별 strict schema + meta를 제공한다",
+        "미구현 렌더러 컴포넌트는 placeholder 전략 문서화"
+      ],
+      "files": [
+        "packages/core/src/registry",
+        "docs/add-component.md"
+      ]
+    },
+    {
+      "id": "S008",
+      "title": "기본 툴 카탈로그 구현 (offline subset real)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "data.load_csv/data.profile/data.transform/viz.prepare_chart_data 실동작",
+        "marketing.build_utm/code.run_js/tool.generate_stub 실동작",
+        "mock/stub 툴이 구조화된 출력과 ActivityLog 이벤트를 남긴다"
+      ],
+      "files": [
+        "packages/core/src/runtime",
+        "packages/core/src/registry",
+        "packages/core/src/examples"
+      ]
+    },
+    {
+      "id": "S009",
+      "title": "widget-iframe + postMessage protocol + script loader",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "typed protocol 정의 및 host/widget 양방향 메시지 처리",
+        "window.GENUI.mount API 제공",
+        "권한 요청/툴 호출/로그 이벤트 메시지 동작"
+      ],
+      "files": [
+        "packages/widget-iframe/src"
+      ]
+    },
+    {
+      "id": "S010",
+      "title": "demo-host + MockPlanner(25+ deterministic prompts incl. Korean)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "demo-host에서 iframe widget을 embed한다",
+        "permission grant UI를 제공한다",
+        "MockPlanner가 25개 이상 프롬프트를 deterministic하게 매핑한다"
+      ],
+      "files": [
+        "apps/demo-host",
+        "apps/demo-widget"
+      ]
+    },
+    {
+      "id": "S011",
+      "title": "seed skillpacks + enable/disable UI",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "data-research/marketing-ops/sales-ops/geo-maps/dev-tools manifest 제공",
+        "runtime에서 skill load/unload 가능",
+        "권한 요청이 host grant와 연결된다"
+      ],
+      "files": [
+        "packages/core/src/skills",
+        "packages/core/src/examples",
+        "apps/demo-host"
+      ]
+    },
+    {
+      "id": "S012",
+      "title": "문서화 quickstart + add-component/tool/skill",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "quickstart.md에 설치/실행/embed 절차 명시",
+        "add-component/add-tool/add-skill 문서가 최소 템플릿 포함",
+        "DX 관점에서 확장 절차가 10분 내 수행 가능하게 구성"
+      ],
+      "files": [
+        "docs/quickstart.md",
+        "docs/add-component.md",
+        "docs/add-tool.md",
+        "docs/add-skill.md"
+      ]
+    },
+    {
+      "id": "S013",
+      "title": "테스트 스위트 (unit + minimal e2e)",
+      "status": "done",
+      "priority": "P0",
+      "acceptance_criteria": [
+        "DSL/patch/binding/permission unit tests 통과",
+        "widget mount -> prompt -> render -> tool -> patch e2e 통과",
+        "CI 스크립트로 test/lint/typecheck 실행 가능"
+      ],
+      "files": [
+        "packages/core",
+        "packages/widget-iframe",
+        "apps/demo-host"
+      ]
+    },
+    {
+      "id": "S014",
+      "title": "P1 renderer-react subset",
+      "status": "done",
+      "priority": "P1",
+      "acceptance_criteria": [
+        "renderer-react가 core DSL plan 일부를 렌더링",
+        "지원 컴포넌트 목록 제공",
+        "동일 runtime 인터페이스를 사용"
+      ],
+      "files": [
+        "packages/renderer-react/src"
+      ]
+    },
+    {
+      "id": "S015",
+      "title": "P1 CLI scaffold",
+      "status": "done",
+      "priority": "P1",
+      "acceptance_criteria": [
+        "genui add-component/add-tool/add-skill 커맨드 제공",
+        "템플릿 생성 후 빌드 가능",
+        "docs와 usage 일치"
+      ],
+      "files": [
+        "packages/cli"
+      ]
+    },
+    {
+      "id": "S016",
+      "title": "GPT Spark — UIPlan DSL에 theme(mood/density/accent) 확장",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "UIPlan 타입에 theme?: {mood, density, accent} 필드 추가",
+        "zod schema에 strict validation 추가",
+        "mood: serious|playful|minimal|vivid|dark",
+        "density: compact|comfortable|spacious",
+        "accent: 7자리 hex 또는 프리셋 키워드",
+        "기존 plan은 theme 없이도 유효하게 유지",
+        "unit test로 valid/invalid theme 파싱 검증"
+      ],
+      "files": [
+        "packages/core/src/dsl/types.ts",
+        "packages/core/src/dsl/schemas.ts",
+        "packages/core/tests/theme.test.ts"
+      ]
+    },
+    {
+      "id": "S017",
+      "title": "GPT Spark — SkillManifest에 allowedDomains 추가 + 동적 CSP 헬퍼",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "SkillManifest에 allowedDomains?: string[] 추가",
+        "seed skillpacks 5종 모두에 현실적인 도메인 기재",
+        "buildConnectSrc(manifests) 헬퍼로 동적 CSP 조립",
+        "와일드카드 금지, 'self' + 명시 도메인만",
+        "unit test로 CSP 조립 검증"
+      ],
+      "files": [
+        "packages/core/src/skills/types.ts",
+        "packages/core/src/examples/skillpacks.ts",
+        "packages/core/src/skills/csp.ts",
+        "packages/core/tests/csp.test.ts"
+      ]
+    },
+    {
+      "id": "S018",
+      "title": "GPT Spark — packages/planner-core + GPTPlanner skeleton",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "@genui/planner-core 워크스페이스 패키지 생성",
+        "Planner 인터페이스를 core에서 export 혹은 재정의",
+        "GPTPlanner 클래스 — constructor({transport, apiKey|proxyUrl, modelTier})",
+        "transport: 'direct'(BYOK) | 'proxy'",
+        "modelTier: {full: string, patch: string} (기본 gpt-4o / gpt-4o-mini)",
+        "plan() 메서드가 Planner 인터페이스 시그니처 준수",
+        "streaming 기본 활성화 (fetch with response.body reader)",
+        "pnpm-workspace 인식, tsconfig.base paths 업데이트"
+      ],
+      "files": [
+        "packages/planner-core/package.json",
+        "packages/planner-core/tsconfig.json",
+        "packages/planner-core/src/index.ts",
+        "packages/planner-core/src/gpt-planner.ts",
+        "packages/planner-core/src/transport.ts",
+        "packages/planner-core/src/types.ts",
+        "tsconfig.base.json"
+      ]
+    },
+    {
+      "id": "S019",
+      "title": "GPT Spark — structured output 스키마 + 프롬프트 빌더",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "PlannerResponse zod schema: {selectedSkills, uiPlan, theme, responseMode, patches?, rationale}",
+        "buildSystemPrompt(skillpacks, allowlistedComponents, locale) 함수",
+        "거부 지시 포함: 이전 지시 무시 요청 거부, 외부 전송 금지, schema만 출력",
+        "buildUserPrompt(input, triggerMode, currentPlan?) 함수",
+        "JSON mode로 구조 보장",
+        "unit test — 프롬프트에 모든 skillpack이 포함되는지"
+      ],
+      "files": [
+        "packages/planner-core/src/response-schema.ts",
+        "packages/planner-core/src/prompt-builder.ts",
+        "packages/planner-core/tests/prompt-builder.test.ts"
+      ]
+    },
+    {
+      "id": "S020",
+      "title": "GPT Spark — 3중 prompt-injection 방어 레이어",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "inputFilter(prompt): 의심 패턴 탐지(ignore previous, system:, <|im_start|>, 등)",
+        "outputStaticCheck(uiPlan, allowedDomains): dataSource URL/action URL allowlist 검증, 위험 key(html, script, eval) 탐지",
+        "이 두 레이어 + 기존 zod + system prompt 규칙으로 총 3중 방어",
+        "차단 시 GuardrailError 던짐, 사유와 위치 포함",
+        "unit test로 각 레이어가 실제 악의적 입력/출력을 차단하는지 검증"
+      ],
+      "files": [
+        "packages/planner-core/src/guardrails/input-filter.ts",
+        "packages/planner-core/src/guardrails/static-check.ts",
+        "packages/planner-core/src/guardrails/index.ts",
+        "packages/planner-core/tests/guardrails.test.ts"
+      ]
+    },
+    {
+      "id": "S021",
+      "title": "GPT Spark — 계층적 에러 복구 (retry/self-heal/block-isolate)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "API retry: 지수 백오프 x3, 이후 fallbackPlanner로 전환",
+        "zod self-heal: GPT에 검증 에러 컨텍스트 함께 재질의 1회",
+        "block-level isolation: 렌더 실패 시 해당 block만 ErrorPlaceholder",
+        "모든 복구 이벤트가 recoveryLedger에 기록",
+        "unit test로 3 레이어 각각 시뮬레이션"
+      ],
+      "files": [
+        "packages/planner-core/src/recovery.ts",
+        "packages/planner-core/tests/recovery.test.ts"
+      ]
+    },
+    {
+      "id": "S022",
+      "title": "GPT Spark — 비용 제어 (모델 티어링 + 토큰 버짓 cap)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "CostLedger: per-session 누적 토큰/비용 추적",
+        "selectModel(triggerMode, tier): mode1→full tier, mode2/3→patch tier",
+        "budget cap: 기본 100k 토큰/일, 80% warning 이벤트, 100% pollingPaused=true",
+        "resetDaily() 지원",
+        "unit test로 cap 동작 검증"
+      ],
+      "files": [
+        "packages/planner-core/src/cost-ledger.ts",
+        "packages/planner-core/tests/cost-ledger.test.ts"
+      ]
+    },
+    {
+      "id": "S023",
+      "title": "GPT Spark — Mode 2 적응형 patch/full 응답 처리",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "Runtime에 refinePlan(feedback) 메서드 추가",
+        "GPTPlanner에 refine() — currentPlan + feedback → PlannerResponse",
+        "responseMode==='patch'이면 applyPatch(), 'full'이면 loadPlan()",
+        "ActivityLog에 refine_started/succeeded/failed 이벤트",
+        "e2e 시나리오: 프롬프트→UI→상호작용→patch→UI 업데이트"
+      ],
+      "files": [
+        "packages/core/src/runtime/workbench-runtime.ts",
+        "packages/planner-core/src/gpt-planner.ts"
+      ]
+    },
+    {
+      "id": "S024",
+      "title": "GPT Spark — Mode 3 dataSource polling + 변경 감지",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "DataSource에 pollIntervalMs?: number 추가",
+        "Runtime에 startFeedMode(fetcher) / stopFeedMode()",
+        "hash(JSON) 기반 변경 감지",
+        "변경 시 GPTPlanner.refine(feedEvent) 호출",
+        "CostLedger.pollingPaused=true면 polling 건너뜀",
+        "e2e 시나리오: 시뮬 주문 변경 → 자동 배너 추가"
+      ],
+      "files": [
+        "packages/core/src/dsl/types.ts",
+        "packages/core/src/dsl/schemas.ts",
+        "packages/core/src/runtime/feed-mode.ts",
+        "packages/core/tests/feed-mode.test.ts"
+      ]
+    },
+    {
+      "id": "S025",
+      "title": "GPT Spark — 내장 DevTools 패널 (dev 모드)",
+      "status": "todo",
+      "priority": "P1",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "WorkbenchDevTools 컴포넌트 (renderer-react)",
+        "Tabs: Request / Response / Validation / Plan History / Patches / Cost",
+        "runtime.devMode=true 일 때만 활성",
+        "streaming 중 실시간 업데이트",
+        "ActivityLog 이벤트 구독"
+      ],
+      "files": [
+        "packages/renderer-react/src/devtools/index.tsx",
+        "packages/renderer-react/src/devtools/tabs.tsx"
+      ]
+    },
+    {
+      "id": "S026",
+      "title": "GPT Spark — renderer-react shadcn 토큰 레이어 + theme 적용",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "renderer-react에 shadcn 디자인 토큰(CSS variables) 추가",
+        "applyTheme(theme) 함수가 CSS 변수로 변환",
+        "mood별 프리셋 색상 맵",
+        "density별 spacing scale",
+        "accent 처리 (hex 또는 프리셋)",
+        "기존 component map 유지 (비파괴적 확장)"
+      ],
+      "files": [
+        "packages/renderer-react/src/theme/index.ts",
+        "packages/renderer-react/src/theme/tokens.css",
+        "packages/renderer-react/src/theme/presets.ts"
+      ]
+    },
+    {
+      "id": "S027",
+      "title": "GPT Spark — demo-host Vite dev server + BYOK 폼 + mode 프리셋",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "Vite config + React 18 entry",
+        "BYOK 폼 (localStorage 저장, 경고 문구 포함)",
+        "모드 1/2/3 프리셋 버튼",
+        "10개 use case 메뉴",
+        "dev 모드 토글 → DevTools 패널 표시"
+      ],
+      "files": [
+        "apps/demo-host/package.json",
+        "apps/demo-host/vite.config.ts",
+        "apps/demo-host/index.html",
+        "apps/demo-host/src/main.tsx",
+        "apps/demo-host/src/App.tsx",
+        "apps/demo-host/src/byok.tsx",
+        "apps/demo-host/src/use-cases.ts"
+      ]
+    },
+    {
+      "id": "S028",
+      "title": "GPT Spark — 테스트 (planner unit + 3-mode e2e + visual regression)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "GPTPlanner unit tests (mocked fetch)",
+        "3 모드 e2e playwright 스크립트",
+        "visual regression screenshot baseline (mood 2종)",
+        "pnpm test 전체 통과"
+      ],
+      "files": [
+        "packages/planner-core/tests/gpt-planner.test.ts",
+        "apps/demo-host/tests/mode1.spec.ts",
+        "apps/demo-host/tests/mode2.spec.ts",
+        "apps/demo-host/tests/mode3.spec.ts",
+        "apps/demo-host/tests/visual.spec.ts"
+      ]
+    },
+    {
+      "id": "S029",
+      "title": "GPT Spark — 문서 풀세트 (8종)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M1-GPT-Spark",
+      "acceptance_criteria": [
+        "docs/gpt-spark-quickstart.md — 설치, BYOK, 첫 프롬프트",
+        "docs/gpt-spark-architecture.md — 파이프라인, 데이터 흐름",
+        "docs/gpt-spark-security.md — 3중 방어 + CSP",
+        "docs/gpt-spark-cost.md — 티어링, 버짓, 시뮬레이션",
+        "docs/gpt-spark-devtools.md — 패널 사용법",
+        "docs/gpt-spark-theme.md — mood/density/accent 커스터마이징",
+        "docs/gpt-spark-roadmap.md — M1→M2→M3",
+        "CHANGELOG.md — M1 entry"
+      ],
+      "files": [
+        "docs/gpt-spark-quickstart.md",
+        "docs/gpt-spark-architecture.md",
+        "docs/gpt-spark-security.md",
+        "docs/gpt-spark-cost.md",
+        "docs/gpt-spark-devtools.md",
+        "docs/gpt-spark-theme.md",
+        "docs/gpt-spark-roadmap.md",
+        "CHANGELOG.md"
+      ]
+    }
+  ]
+}
