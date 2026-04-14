@@ -80,9 +80,17 @@ export function App(): ReactElement {
     });
   }, [byok]);
 
+  // Auto-load a welcome demo plan on first render
+  useEffect(() => {
+    const mock = new MockPlanner();
+    const welcome = mock.plan("daily ops dashboard");
+    setPlan(welcome);
+    setStatus("welcome · mock");
+  }, []);
+
   useEffect(() => {
     if (!mountRef.current) return;
-    rendererRef.current = new DefaultReactRenderer();
+    rendererRef.current = rendererRef.current ?? new DefaultReactRenderer();
     if (plan) {
       rendererRef.current.renderPlan(plan, runtime, mountRef.current);
       applyTheme(mountRef.current, plan.theme);
