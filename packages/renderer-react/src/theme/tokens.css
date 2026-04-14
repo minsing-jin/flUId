@@ -50,7 +50,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Block Card ── */
+/* ── Block Card with stagger animation ── */
 .genui-react-workbench > section {
   background: var(--genui-bg);
   color: var(--genui-fg);
@@ -59,10 +59,21 @@ body {
   padding: calc(20px * var(--genui-spacing));
   box-shadow: var(--genui-shadow);
   transition: box-shadow var(--genui-transition), transform var(--genui-transition), opacity var(--genui-transition);
-  animation: genui-fade-in 0.4s ease-out;
+  animation: genui-block-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   cursor: grab;
   position: relative;
 }
+
+/* Stagger: each block appears slightly later */
+.genui-react-workbench > section:nth-child(1) { animation-delay: 0ms; }
+.genui-react-workbench > section:nth-child(2) { animation-delay: 80ms; }
+.genui-react-workbench > section:nth-child(3) { animation-delay: 160ms; }
+.genui-react-workbench > section:nth-child(4) { animation-delay: 240ms; }
+.genui-react-workbench > section:nth-child(5) { animation-delay: 320ms; }
+.genui-react-workbench > section:nth-child(6) { animation-delay: 400ms; }
+.genui-react-workbench > section:nth-child(7) { animation-delay: 480ms; }
+.genui-react-workbench > section:nth-child(8) { animation-delay: 560ms; }
+.genui-react-workbench > section:nth-child(n+9) { animation-delay: 640ms; }
 
 .genui-react-workbench > section:hover {
   box-shadow: var(--genui-shadow-md);
@@ -98,6 +109,19 @@ body {
 @keyframes genui-fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes genui-block-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 @keyframes genui-skeleton-pulse {
