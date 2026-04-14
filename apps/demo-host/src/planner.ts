@@ -129,7 +129,77 @@ export class MockPlanner implements Planner {
     ],
     ["load file and chart", basePlan("File + Chart", "analysis", [{ id: "upload", type: "FileUpload", region: "left", props: {} }, { id: "chart", type: "ChartBlock", region: "main", props: { chartType: "line", series: [] } }])],
     ["geo route plan", basePlan("Route Plan", "geo", [{ id: "geo-search", type: "GeoSearchBox", region: "left", props: {} }, { id: "route", type: "RoutePlanner", region: "main", props: {} }])],
-    ["notebook for analysis", basePlan("Notebook", "dev", [{ id: "nb", type: "NotebookCells", region: "main", props: {} }])]
+    ["notebook for analysis", basePlan("Notebook", "dev", [{ id: "nb", type: "NotebookCells", region: "main", props: {} }])],
+
+    /* ── Generic Declarative Renderer 데모 (Flexible UI) ── */
+    ["내 프로필 페이지 만들어줘", basePlan("My Profile", "custom", [
+      { id: "profile", type: "UserProfile", region: "main", props: {
+        children: [
+          { element: "card", children: [
+            { element: "flex", align: "center", gap: 16, children: [
+              { element: "image", src: "https://api.dicebear.com/7.x/avataaars/svg?seed=fluid", alt: "avatar", style: { width: 80, height: 80, borderRadius: "50%" } },
+              { element: "stack", gap: 4, children: [
+                { element: "heading", value: "flUId User", level: 2 },
+                { element: "text", value: "Product Owner · Seoul, Korea", style: { color: "var(--genui-muted)" } },
+                { element: "flex", gap: 8, children: [
+                  { element: "badge", value: "Pro Plan", color: "var(--genui-accent)" },
+                  { element: "badge", value: "Early Adopter", color: "#22c55e" }
+                ] }
+              ] }
+            ] },
+            { element: "divider" },
+            { element: "grid", columns: 3, children: [
+              { element: "stack", children: [{ element: "text", value: "142", style: { fontSize: 24, fontWeight: 700, color: "var(--genui-accent)" } }, { element: "text", value: "Projects", style: { fontSize: 12, color: "var(--genui-muted)" } }] },
+              { element: "stack", children: [{ element: "text", value: "1.2K", style: { fontSize: 24, fontWeight: 700, color: "var(--genui-accent)" } }, { element: "text", value: "Followers", style: { fontSize: 12, color: "var(--genui-muted)" } }] },
+              { element: "stack", children: [{ element: "text", value: "89%", style: { fontSize: 24, fontWeight: 700, color: "var(--genui-accent)" } }, { element: "text", value: "Completion", style: { fontSize: 12, color: "var(--genui-muted)" } }] }
+            ] },
+            { element: "divider" },
+            { element: "heading", value: "Recent Activity", level: 3 },
+            { element: "stack", gap: 6, children: [
+              { element: "flex", justify: "space-between", children: [{ element: "text", value: "Created 'Sales Dashboard'" }, { element: "text", value: "2h ago", style: { color: "var(--genui-muted)", fontSize: 12 } }] },
+              { element: "flex", justify: "space-between", children: [{ element: "text", value: "Updated marketing campaign" }, { element: "text", value: "5h ago", style: { color: "var(--genui-muted)", fontSize: 12 } }] },
+              { element: "flex", justify: "space-between", children: [{ element: "text", value: "Shared report with team" }, { element: "text", value: "1d ago", style: { color: "var(--genui-muted)", fontSize: 12 } }] }
+            ] }
+          ] }
+        ]
+      } }
+    ])],
+
+    ["날씨 위젯 만들어줘", basePlan("Weather Dashboard", "custom", [
+      { id: "weather", type: "WeatherWidget", region: "main", props: {
+        children: [
+          { element: "grid", columns: 2, children: [
+            { element: "card", children: [
+              { element: "flex", align: "center", gap: 16, children: [
+                { element: "text", value: "☀️", style: { fontSize: 64 } },
+                { element: "stack", gap: 2, children: [
+                  { element: "text", value: "Seoul", style: { fontSize: 14, color: "var(--genui-muted)" } },
+                  { element: "text", value: "24°C", style: { fontSize: 42, fontWeight: 700, color: "var(--genui-fg)" } },
+                  { element: "text", value: "Sunny · Feels like 26°C", style: { fontSize: 13, color: "var(--genui-muted)" } }
+                ] }
+              ] },
+              { element: "divider" },
+              { element: "flex", justify: "space-between", children: [
+                { element: "stack", children: [{ element: "text", value: "Humidity", style: { fontSize: 11, color: "var(--genui-muted)" } }, { element: "text", value: "45%", style: { fontWeight: 600 } }] },
+                { element: "stack", children: [{ element: "text", value: "Wind", style: { fontSize: 11, color: "var(--genui-muted)" } }, { element: "text", value: "12 km/h", style: { fontWeight: 600 } }] },
+                { element: "stack", children: [{ element: "text", value: "UV", style: { fontSize: 11, color: "var(--genui-muted)" } }, { element: "text", value: "High", style: { fontWeight: 600, color: "#f59e0b" } }] }
+              ] }
+            ] },
+            { element: "card", children: [
+              { element: "heading", value: "7-Day Forecast", level: 3 },
+              { element: "stack", gap: 8, children: [
+                { element: "flex", justify: "space-between", align: "center", children: [{ element: "text", value: "Mon" }, { element: "text", value: "☀️ 25°/18°" }, { element: "progress", percent: 10, height: 4, color: "#3b82f6" }] },
+                { element: "flex", justify: "space-between", align: "center", children: [{ element: "text", value: "Tue" }, { element: "text", value: "⛅ 22°/16°" }, { element: "progress", percent: 30, height: 4, color: "#3b82f6" }] },
+                { element: "flex", justify: "space-between", align: "center", children: [{ element: "text", value: "Wed" }, { element: "text", value: "🌧️ 19°/14°" }, { element: "progress", percent: 80, height: 4, color: "#3b82f6" }] },
+                { element: "flex", justify: "space-between", align: "center", children: [{ element: "text", value: "Thu" }, { element: "text", value: "⛅ 21°/15°" }, { element: "progress", percent: 40, height: 4, color: "#3b82f6" }] },
+                { element: "flex", justify: "space-between", align: "center", children: [{ element: "text", value: "Fri" }, { element: "text", value: "☀️ 26°/19°" }, { element: "progress", percent: 5, height: 4, color: "#3b82f6" }] }
+              ] }
+            ] }
+          ] },
+          { element: "alert", variant: "info", value: "Air quality is Good (AQI 42). Enjoy outdoor activities!" }
+        ]
+      } }
+    ])]
   ]);
 
   plan(prompt: string): UIPlan {
@@ -139,7 +209,33 @@ export class MockPlanner implements Planner {
       return template;
     }
 
-    return basePlan("Custom Workbench", "custom", [{ id: "summary", type: "SummaryBlock", region: "main", props: { bullets: [trimmed] } }]);
+    // Fuzzy match: check if any keyword from templates appears in prompt
+    for (const [key, plan] of this.templates) {
+      const keywords = key.toLowerCase().split(/\s+/);
+      const promptLower = trimmed.toLowerCase();
+      const matchCount = keywords.filter((kw) => kw.length > 2 && promptLower.includes(kw)).length;
+      if (matchCount >= 2) {
+        return plan;
+      }
+    }
+
+    // Default: generate a generic flexible card with the prompt text
+    return basePlan("Custom Workbench", "custom", [
+      { id: "auto", type: "AutoGenerated", region: "main", props: {
+        children: [
+          { element: "card", children: [
+            { element: "heading", value: "Your Request", level: 2 },
+            { element: "text", value: trimmed, style: { fontSize: 15, lineHeight: 1.6 } },
+            { element: "divider" },
+            { element: "alert", variant: "info", value: "API 키를 입력하면 GPT가 이 요청에 맞는 실제 UI를 자동 생성합니다." },
+            { element: "flex", gap: 8, children: [
+              { element: "button", value: "BYOK 설정하기" },
+              { element: "button", value: "데모 보기", color: "var(--genui-muted)" }
+            ] }
+          ] }
+        ]
+      } }
+    ]);
   }
 
   getPromptCount(): number {

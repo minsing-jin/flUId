@@ -1,0 +1,34 @@
+goal: >
+  flUId의 핵심 철학 "Flexible UI"를 실현한다. GPT가 미리 등록된 컴포넌트 목록에
+  제한되지 않고, 선언적 프리미티브(text, card, grid, flex, badge, progress, image,
+  divider, button 등)를 자유롭게 조합해 어떤 UI든 즉석에서 만들 수 있게 한다.
+  기존 등록 컴포넌트는 그대로 동작하되, 미등록 타입은 자동으로 Generic Declarative
+  Renderer가 처리한다.
+
+constraints:
+  - 기존 등록 컴포넌트(KPIGrid, ChartBlock 등)는 그대로 동작 (backward compat)
+  - 미등록 컴포넌트는 JSON fallback이 아닌 실제 시각적 UI로 렌더링
+  - GPT가 생성하는 선언적 구조는 UIPlan DSL의 Block.props 안에 children 배열로 표현
+  - 보안: 선언적 프리미티브만 허용, 임의 HTML/script 실행 불가
+  - TypeScript strict, any 금지
+  - 기존 테스트 전원 통과 유지
+
+acceptance_criteria:
+  - Block.props.children으로 선언적 UI 트리를 기술할 수 있음
+  - GenericRenderer가 14+ 프리미티브를 지원 (text, card, grid, flex, stack, badge, progress, image, divider, button, input, link, spacer, heading)
+  - 미등록 type의 Block은 자동으로 GenericRenderer로 라우팅
+  - 기존 등록 컴포넌트(KPIGrid 등)는 변경 없이 동작
+  - GenericRenderer가 theme CSS variables를 존중 (mood/density/accent 반영)
+  - GPT system prompt에 선언적 프리미티브 목록과 사용법이 포함
+  - 중첩 children 지원 (card 안에 grid 안에 text 등 무제한 깊이)
+  - 보안: script/eval/innerHTML 등 위험 프리미티브는 거부
+  - MockPlanner에 Generic Renderer 활용 데모 템플릿 최소 2개
+  - unit test: GenericRenderer가 children 트리를 올바르게 렌더링
+  - 브라우저에서 Generic 컴포넌트가 시각적으로 정상 렌더링
+  - pnpm typecheck 8/8 통과, pnpm test 전원 통과
+
+metadata:
+  version: 1.0
+  milestone: M-Flex
+  ambiguity_score: 0.08
+  created: 2026-04-14

@@ -2,6 +2,7 @@ import { createElement, type ReactElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import type { UIPlan } from "@genui/core";
 import { listReactSupportedComponents, reactComponentMap } from "../components/index.js";
+import { renderGenericBlock } from "../generic/index.js";
 
 export interface ReactRenderAdapter {
   listSupportedComponents(): string[];
@@ -15,17 +16,20 @@ function renderBlock(plan: UIPlan, blockId: string): ReactElement | null {
     return null;
   }
 
+  // Check registered components first
   const renderer = reactComponentMap[block.type];
-  if (!renderer) {
-    return createElement("pre", null, `Unsupported component: ${block.type}`);
-  }
+
+  // If not registered → use Generic Declarative Renderer
+  const body = renderer
+    ? renderer(block.props)
+    : renderGenericBlock(block.props);
 
   return createElement(
     "section",
     { key: block.id, "data-block-id": block.id, "data-region": block.region },
     [
       block.title ? createElement("h3", { key: `${block.id}-title` }, block.title) : null,
-      createElement("div", { key: `${block.id}-body` }, renderer(block.props))
+      createElement("div", { key: `${block.id}-body` }, body)
     ]
   );
 }

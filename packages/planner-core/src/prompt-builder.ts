@@ -83,12 +83,41 @@ UIPlan fields:
   title: string
   intent: "research" | "analysis" | "marketing" | "sales" | "dev" | "geo" | "ops" | "custom"
   layout: { shell: "workbench", regions: ("left"|"main"|"right"|"bottom")[] }
-  blocks: { id, type (allowlisted), region, props, bindings?, visibleWhen? }[]
+  blocks: { id, type, region, props, bindings?, visibleWhen? }[]
   actions: { id, label, toolName (allowlisted), input }[]
   dataSources: { id, kind: "table"|"text"|"json"|"file"|"geo"|"chart", data?, meta? }[]
   state: object
   permissions: { requested: string[], granted: string[] }
   theme?: same as top-level theme
+
+# IMPORTANT: Flexible Block Types
+You can use any block type name. If a block type is in the allowlisted widget list above,
+its dedicated renderer is used. For ANY OTHER type, a Generic Declarative Renderer
+takes over — you describe the UI with a "children" array of primitive elements.
+
+The "children" array contains declarative nodes like:
+  { "element": "card", "children": [
+    { "element": "heading", "value": "Title", "level": 2 },
+    { "element": "text", "value": "Description text" },
+    { "element": "grid", "columns": 3, "children": [
+      { "element": "card", "children": [{ "element": "text", "value": "$12K", "style": {"fontSize":28,"fontWeight":700,"color":"var(--genui-accent)"} }, { "element": "text", "value": "Revenue" }] },
+      { "element": "card", "children": [{ "element": "text", "value": "87%", "style": {"fontSize":28,"fontWeight":700} }, { "element": "text", "value": "Growth" }] }
+    ] }
+  ] }
+
+Available primitives:
+  Layout: card, grid (columns), flex (direction, gap, align, justify, wrap), stack (gap), container, section, box
+  Text: text (value), heading (value, level 1-6), code (value)
+  Display: badge (value, color), progress (percent, color, height), image (src, alt), divider, spacer (size), alert (value, variant: info|success|warning|error)
+  Interactive: button (value, color), input (placeholder, inputType), link (value, href)
+  Data: list (items[], ordered?), table (columns[], rows[])
+
+You can FREELY invent any block type. For example:
+  { "type": "UserProfile", "region": "left", "props": { "children": [...] } }
+  { "type": "WeatherWidget", "region": "right", "props": { "children": [...] } }
+  { "type": "SNSDashboard", "region": "main", "props": { "children": [...] } }
+
+This means you are NOT limited to the allowlisted types. Be creative. Build any UI.
 
 Design guidance:
 - Pick a mood that matches the register (serious for finance/ops, playful for personal/weekend, minimal for focus, vivid for marketing, dark for night dashboards).
