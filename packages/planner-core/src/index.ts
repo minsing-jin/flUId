@@ -1,8 +1,12 @@
 export * from "./types.js";
 export * from "./response-schema.js";
 export * from "./prompt-builder.js";
-export * from "./transport.js";
+export { sendCompletion, type FetchLike } from "./transport.js";
 export * from "./guardrails/index.js";
 export * from "./cost-ledger.js";
 export * from "./recovery.js";
 export * from "./gpt-planner.js";
+export * from "./response-cache.js";
+export * from "./providers/index.js";
+export * from "./multi-agent/index.js";
+export * from "./schema-converter.js";

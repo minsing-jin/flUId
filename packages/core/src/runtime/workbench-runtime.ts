@@ -4,6 +4,8 @@ import { resolveBindingsInObject } from "../bindings/resolver.js";
 import { applyPlanPatch } from "../patches/apply.js";
 import { ComponentRegistry } from "../registry/component-registry.js";
 import { ToolRegistry } from "../registry/tool-registry.js";
+import type { SkillManifest } from "../skills/types.js";
+import { buildConnectSrc } from "../skills/csp.js";
 import type { RuntimeEvent, RuntimeEventType } from "../telemetry/types.js";
 import { RuntimeStore } from "./store.js";
 
@@ -29,6 +31,8 @@ export interface RefineResult {
 
 export class WorkbenchRuntime {
   private readonly store = new RuntimeStore();
+  private readonly activeSkillpacks = new Map<string, SkillManifest>();
+  private currentConnectSrc = "'self'";
 
   constructor(
     private readonly componentRegistry: ComponentRegistry,
@@ -38,6 +42,30 @@ export class WorkbenchRuntime {
 
   isDevMode(): boolean {
     return this.options.devMode === true;
+  }
+
+  loadSkillpack(manifest: SkillManifest): void {
+    this.activeSkillpacks.set(manifest.id, manifest);
+    this.rebuildCsp();
+    this.logEvent("plan_loaded", { event: "skillpack_loaded", skillId: manifest.id });
+  }
+
+  unloadSkillpack(id: string): void {
+    this.activeSkillpacks.delete(id);
+    this.rebuildCsp();
+    this.logEvent("plan_loaded", { event: "skillpack_unloaded", skillId: id });
+  }
+
+  getActiveSkillpacks(): SkillManifest[] {
+    return [...this.activeSkillpacks.values()];
+  }
+
+  getConnectSrc(): string {
+    return this.currentConnectSrc;
+  }
+
+  private rebuildCsp(): void {
+    this.currentConnectSrc = buildConnectSrc([...this.activeSkillpacks.values()]);
   }
 
   getPlan(): UIPlan | null {

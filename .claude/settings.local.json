@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_ouroboros_ouroboros__ouroboros_interview",
+      "WebSearch",
+      "Bash(pnpm -C packages/core run typecheck)",
+      "Bash(pnpm -C packages/planner-core run typecheck)",
+      "Bash(pnpm -C packages/core run test)",
+      "Bash(node --test /Users/jinminseong/Desktop/flUId/packages/core/dist-test/tests/csp.test.js)",
+      "Bash(node --test dist-test/tests/)",
+      "Bash(pnpm -C packages/widget-iframe run typecheck)",
+      "Bash(pnpm -C packages/cli run typecheck)",
+      "Bash(pnpm --filter @genui/cli run typecheck)",
+      "Bash(pnpm --filter @genui/renderer-web run typecheck)",
+      "Bash(pnpm --filter @genui/renderer-react run typecheck)",
+      "Bash(pnpm --filter '!@genui/demo-host' run typecheck)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm --filter @genui/demo-host run typecheck)",
+      "Bash(pnpm --filter @genui/core run test)",
+      "Bash(pnpm:*)",
+      "Bash(curl -s http://127.0.0.1:5174/)",
+      "Bash(curl -s http://127.0.0.1:5174/src/main.tsx)",
+      "Bash(curl -s http://127.0.0.1:5174/src/App.tsx)",
+      "Bash(lsof -ti:5173,5174)",
+      "Bash(xargs -r kill)",
+      "Bash(npx vite:*)",
+      "Bash(curl -s -o /dev/null -w \"main.tsx: %{http_code}\\\\n\" http://127.0.0.1:5173/src/main.tsx)",
+      "Bash(curl -s -o /dev/null -w \"App.tsx: %{http_code}\\\\n\" http://127.0.0.1:5173/src/App.tsx)",
+      "Bash(curl -s -o /dev/null -w \"byok.tsx: %{http_code}\\\\n\" http://127.0.0.1:5173/src/byok.tsx)",
+      "Bash(curl -s -o /dev/null -w \"use-cases.ts: %{http_code}\\\\n\" http://127.0.0.1:5173/src/use-cases.ts)",
+      "Bash(curl -s -o /dev/null -w \"planner.ts: %{http_code}\\\\n\" http://127.0.0.1:5173/src/planner.ts)",
+      "Bash(node:*)",
+      "Bash(lsof -ti:5173)",
+      "Bash(xargs kill:*)",
+      "Bash(gh repo:*)",
+      "Bash(curl -s -o /dev/null -w \"5173: %{http_code}\\\\n\" http://127.0.0.1:5173/)",
+      "Bash(curl -s -o /dev/null -w \"5174: %{http_code}\\\\n\" http://127.0.0.1:5174/)"
+    ]
+  }
+}

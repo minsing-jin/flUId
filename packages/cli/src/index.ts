@@ -19,6 +19,54 @@ function toKebabCase(input: string): string {
     .toLowerCase();
 }
 
+async function importTokens(cwd: string, filePath: string): Promise<void> {
+  if (!filePath) {
+    console.error("Usage: genui import-tokens <tokens.json>");
+    process.exit(1);
+  }
+  const { readFile } = await import("node:fs/promises");
+  const absPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  const raw = await readFile(absPath, "utf-8");
+  const data = JSON.parse(raw) as Record<string, unknown>;
+
+  // Detect format: Figma Variables or Style Dictionary
+  const isFigma = "collections" in data || "modes" in data;
+  const isStyleDict = "color" in data || "spacing" in data;
+
+  const tokens: Record<string, string> = {};
+
+  if (isFigma) {
+    // Figma Variables export format
+    const variables = (data.variables ?? data.collections ?? data) as Record<string, unknown>;
+    for (const [key, val] of Object.entries(variables)) {
+      if (typeof val === "string") tokens[`--genui-${key.replace(/\//g, "-").toLowerCase()}`] = val;
+    }
+  } else if (isStyleDict) {
+    // Style Dictionary flat format
+    function flatten(obj: Record<string, unknown>, prefix: string): void {
+      for (const [k, v] of Object.entries(obj)) {
+        const path = prefix ? `${prefix}-${k}` : k;
+        if (v && typeof v === "object" && "value" in (v as Record<string, unknown>)) {
+          tokens[`--genui-${path}`] = String((v as Record<string, unknown>).value);
+        } else if (v && typeof v === "object") {
+          flatten(v as Record<string, unknown>, path);
+        }
+      }
+    }
+    flatten(data, "");
+  } else {
+    // Generic key-value
+    for (const [key, val] of Object.entries(data)) {
+      if (typeof val === "string") tokens[`--genui-${key}`] = val;
+    }
+  }
+
+  const cssLines = [":root {", ...Object.entries(tokens).map(([k, v]) => `  ${k}: ${v};`), "}"];
+  const outPath = path.join(cwd, "packages/renderer-react/src/theme/imported-tokens.css");
+  await writeFile(outPath, cssLines.join("\n") + "\n");
+  console.log(`Imported ${Object.keys(tokens).length} tokens → ${path.relative(cwd, outPath)}`);
+}
+
 async function ensureWorkspaceRoot(cwd: string): Promise<void> {
   const workspaceFile = path.join(cwd, "pnpm-workspace.yaml");
   await access(workspaceFile);
@@ -95,11 +143,32 @@ function skillTemplate(skillId: string): string {
 }
 
 async function run(): Promise<void> {
-  const [, , command, name] = process.argv;
+  const allArgs = process.argv.slice(2);
+  const command = allArgs[0];
+  const name = allArgs[1];
   const cwd = process.cwd();
 
+  if (command === "dev") {
+    const { spawn } = await import("node:child_process");
+    const gptSpark = allArgs.includes("--gpt-spark") || allArgs.includes("-g");
+    const filter = gptSpark ? "@genui/demo-host" : "*";
+    console.log(`Starting dev server${gptSpark ? " (GPT Spark mode)" : ""}...`);
+    const child = spawn("pnpm", ["--filter", filter, "exec", "vite", "--host", "127.0.0.1", "--port", "5173", "--open"], {
+      cwd,
+      stdio: "inherit",
+      shell: true
+    });
+    child.on("exit", (code) => process.exit(code ?? 0));
+    return;
+  }
+
+  if (command === "import-tokens") {
+    await importTokens(cwd, name ?? "");
+    return;
+  }
+
   if (!command || !name) {
-    console.log("Usage: genui add-component <Name> | add-tool <name> | add-skill <id>");
+    console.log("Usage: genui add-component <Name> | add-tool <name> | add-skill <id> | dev [--gpt-spark] | import-tokens <file>");
     process.exit(1);
   }
 

@@ -51,6 +51,7 @@ export type DataSource = {
   data?: unknown;
   meta?: Record<string, unknown>;
   pollIntervalMs?: number;
+  feedUrl?: string;
 };
 
 export type Block = {

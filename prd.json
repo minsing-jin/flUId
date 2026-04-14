@@ -530,6 +530,173 @@
         "docs/gpt-spark-roadmap.md",
         "CHANGELOG.md"
       ]
+    },
+    {
+      "id": "S030",
+      "title": "M2 — 응답 캐싱 (hash, 10min TTL, LRU)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M2",
+      "acceptance_criteria": [
+        "ResponseCache 클래스 구현",
+        "key = hash(prompt + currentPlan + dataSnapshot)",
+        "TTL 10분, LRU eviction (max 50 entries)",
+        "GPTPlanner.plan()에서 캐시 히트 시 API 호출 skip",
+        "DevTools Cost 탭에 cache hit/miss 표시",
+        "unit test로 TTL 만료 + LRU eviction 검증"
+      ],
+      "files": ["packages/planner-core/src/response-cache.ts", "packages/planner-core/tests/response-cache.test.ts"]
+    },
+    {
+      "id": "S031",
+      "title": "M2 — 멀티 프로바이더 transport (Anthropic + OpenAI + Local)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M2",
+      "acceptance_criteria": [
+        "Provider 인터페이스 추상화",
+        "OpenAIProvider (기존 transport 리팩터)",
+        "AnthropicProvider (Claude API Messages 형식)",
+        "LocalProvider (Ollama 호환 localhost:11434)",
+        "GPTPlannerConfig.provider 옵션 추가",
+        "unit test로 각 provider 응답 파싱 검증"
+      ],
+      "files": ["packages/planner-core/src/providers/", "packages/planner-core/tests/providers.test.ts"]
+    },
+    {
+      "id": "S032",
+      "title": "M2 — LLM-as-judge 안전 레이어",
+      "status": "todo",
+      "priority": "P1",
+      "milestone": "M2",
+      "acceptance_criteria": [
+        "llmJudge(plan, provider) → {safe: boolean, reason: string}",
+        "저렴한 모델로 생성된 plan의 안전성 평가",
+        "GPTPlanner pipeline에 선택적 통합 (config.enableJudge)",
+        "unsafe 판정 시 GuardrailError 발생",
+        "unit test로 safe/unsafe 시나리오 검증"
+      ],
+      "files": ["packages/planner-core/src/guardrails/llm-judge.ts", "packages/planner-core/tests/llm-judge.test.ts"]
+    },
+    {
+      "id": "S033",
+      "title": "M2 — Skillpack 동적 로딩/언로딩 API",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M2",
+      "acceptance_criteria": [
+        "WorkbenchRuntime.loadSkillpack(manifest) 메서드",
+        "WorkbenchRuntime.unloadSkillpack(id) 메서드",
+        "CSP 자동 재조립 (buildConnectSrc 호출)",
+        "GPTPlanner system prompt 자동 갱신",
+        "이벤트: skillpack_loaded / skillpack_unloaded"
+      ],
+      "files": ["packages/core/src/runtime/workbench-runtime.ts", "packages/core/tests/skillpack-dynamic.test.ts"]
+    },
+    {
+      "id": "S034",
+      "title": "M2 — CLI genui dev --gpt-spark",
+      "status": "todo",
+      "priority": "P1",
+      "milestone": "M2",
+      "acceptance_criteria": [
+        "genui dev 명령에 --gpt-spark 플래그 추가",
+        "Vite dev server 자동 기동",
+        "브라우저 자동 오픈 (open package)",
+        "터미널에 상태 출력"
+      ],
+      "files": ["packages/cli/src/index.ts"]
+    },
+    {
+      "id": "S035",
+      "title": "M3 — WebSocket 실시간 피드 (polling 대체)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "WebSocketFeedMode 클래스 구현",
+        "DataSource에 feedUrl?: string 필드 추가",
+        "자동 재연결 (지수 백오프)",
+        "backpressure: 미처리 메시지 큐 제한",
+        "기존 FeedMode(polling)와 선택적 사용",
+        "이벤트: ws_connected / ws_disconnected / ws_message"
+      ],
+      "files": ["packages/core/src/runtime/ws-feed-mode.ts", "packages/core/src/dsl/types.ts", "packages/core/tests/ws-feed-mode.test.ts"]
+    },
+    {
+      "id": "S036",
+      "title": "M3 — 멀티 에이전트 플래너 (Router → Selector → Generator)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "IntentRouter: prompt → intent + complexity score",
+        "SkillSelector: intent → 최적 skillpack 조합",
+        "UIGenerator: skills + prompt → UIPlan",
+        "MultiAgentPlanner가 Planner 인터페이스 구현",
+        "config로 single(기존) vs multi 선택 가능",
+        "각 단계 독립 테스트 가능"
+      ],
+      "files": ["packages/planner-core/src/multi-agent/"]
+    },
+    {
+      "id": "S037",
+      "title": "M3 — Cross-widget pub/sub EventBus",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "WidgetEventBus 클래스 구현",
+        "typed topic subscribe/publish",
+        "widget-iframe protocol에 GENUI_EVENT_PUBLISH / GENUI_EVENT_SUBSCRIBE 추가",
+        "scoped permissions (topic allowlist per widget)",
+        "unit test로 pub/sub + 격리 검증"
+      ],
+      "files": ["packages/core/src/runtime/event-bus.ts", "packages/widget-iframe/src/protocol/index.ts"]
+    },
+    {
+      "id": "S038",
+      "title": "M3 — ARIA 접근성 자동 검사",
+      "status": "todo",
+      "priority": "P1",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "accessibilityCheck(plan): 접근성 이슈 목록 반환",
+        "ARIA role/label 누락, 색상 대비 부족, 키보드 탐색 불가 검출",
+        "DevTools에 Accessibility 탭 추가",
+        "렌더링 후 자동 실행 (dev 모드)"
+      ],
+      "files": ["packages/renderer-react/src/accessibility/", "packages/renderer-react/src/devtools/index.tsx"]
+    },
+    {
+      "id": "S039",
+      "title": "M3 — 디자인 토큰 import (Figma/Style Dictionary)",
+      "status": "todo",
+      "priority": "P1",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "genui import-tokens <file.json> CLI 명령",
+        "Figma Variables JSON 파싱",
+        "Style Dictionary JSON 파싱",
+        "기존 ThemeTokens 형식으로 변환",
+        "renderer-react/theme/presets.ts에 커스텀 프리셋 추가"
+      ],
+      "files": ["packages/cli/src/import-tokens.ts", "packages/renderer-react/src/theme/presets.ts"]
+    },
+    {
+      "id": "S040",
+      "title": "M3 — OpenAI Structured Output mode (json_schema param)",
+      "status": "todo",
+      "priority": "P0",
+      "milestone": "M3",
+      "acceptance_criteria": [
+        "zodToJsonSchema(plannerResponseSchema) 변환기 구현",
+        "transport에서 response_format.json_schema 파라미터 전달",
+        "self-heal retry 불필요해지므로 성능 개선",
+        "Anthropic/Local에는 기존 json_object 모드 유지",
+        "unit test로 zod→JSON schema 변환 검증"
+      ],
+      "files": ["packages/planner-core/src/schema-converter.ts", "packages/planner-core/src/transport.ts"]
     }
   ]
 }

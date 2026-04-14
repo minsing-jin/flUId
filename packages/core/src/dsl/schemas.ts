@@ -61,7 +61,8 @@ export const dataSourceSchema = z
     kind: z.enum(["table", "text", "json", "file", "geo", "chart"]),
     data: z.unknown().optional(),
     meta: z.record(z.unknown()).optional(),
-    pollIntervalMs: z.number().int().positive().optional()
+    pollIntervalMs: z.number().int().positive().optional(),
+    feedUrl: z.string().url().optional()
   })
   .strict();
 
