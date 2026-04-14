@@ -1,53 +1,205 @@
 /*
- * GPT Spark base tokens — these are defaults; applyTheme() overrides them per plan.
- * Import once from the consumer app so Shadcn-like primitives reference the same vars.
+ * flUId Design System — Production-grade tokens
+ * Shadcn-inspired with animations, shadows, and transitions
  */
 :root {
-  --genui-bg: #f8fafc;
+  --genui-bg: #ffffff;
+  --genui-bg-secondary: #f8fafc;
   --genui-fg: #0f172a;
   --genui-muted: #64748b;
   --genui-border: #e2e8f0;
   --genui-accent: #4f46e5;
   --genui-accent-fg: #ffffff;
-  --genui-radius: 6px;
+  --genui-accent-hover: #4338ca;
+  --genui-radius: 12px;
+  --genui-radius-sm: 8px;
+  --genui-radius-lg: 16px;
   --genui-spacing: 1;
   --genui-font-size: 14px;
-  --genui-font-family: "Inter", "Pretendard", system-ui, sans-serif;
+  --genui-font-family: "Inter", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --genui-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --genui-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --genui-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --genui-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+  --genui-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--genui-font-family);
+  font-size: var(--genui-font-size);
+  color: var(--genui-fg);
+  background: var(--genui-bg-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Workbench Grid ── */
 .genui-react-workbench {
-  background: var(--genui-bg);
+  background: var(--genui-bg-secondary);
   color: var(--genui-fg);
   font-family: var(--genui-font-family);
   font-size: var(--genui-font-size);
-  padding: calc(16px * var(--genui-spacing));
+  padding: calc(20px * var(--genui-spacing));
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: calc(16px * var(--genui-spacing));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: calc(20px * var(--genui-spacing));
   min-height: 100vh;
 }
 
+/* ── Block Card ── */
 .genui-react-workbench > section {
   background: var(--genui-bg);
   color: var(--genui-fg);
   border: 1px solid var(--genui-border);
   border-radius: var(--genui-radius);
-  padding: calc(16px * var(--genui-spacing));
+  padding: calc(20px * var(--genui-spacing));
+  box-shadow: var(--genui-shadow);
+  transition: box-shadow var(--genui-transition), transform var(--genui-transition), opacity var(--genui-transition);
+  animation: genui-fade-in 0.4s ease-out;
+  cursor: grab;
+  position: relative;
 }
 
+.genui-react-workbench > section:hover {
+  box-shadow: var(--genui-shadow-md);
+  transform: translateY(-1px);
+}
+
+.genui-react-workbench > section:active {
+  cursor: grabbing;
+  box-shadow: var(--genui-shadow-lg);
+  transform: scale(0.99);
+}
+
+.genui-react-workbench > section.dragging {
+  opacity: 0.5;
+  transform: scale(0.97);
+}
+
+.genui-react-workbench > section.drag-over {
+  border-color: var(--genui-accent);
+  box-shadow: 0 0 0 2px var(--genui-accent), var(--genui-shadow-md);
+}
+
+/* ── Headings ── */
 .genui-react-workbench h3 {
-  margin: 0 0 calc(8px * var(--genui-spacing)) 0;
-  font-weight: 600;
+  margin: 0 0 calc(12px * var(--genui-spacing)) 0;
+  font-weight: 700;
+  font-size: 15px;
   color: var(--genui-fg);
+  letter-spacing: -0.01em;
 }
 
-.genui-accent {
-  color: var(--genui-accent);
+/* ── Animations ── */
+@keyframes genui-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes genui-skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes genui-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes genui-ripple {
+  to { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Loading Skeleton ── */
+.genui-skeleton {
+  animation: genui-fade-in 0.3s ease-out;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: calc(20px * var(--genui-spacing));
+  padding: calc(20px * var(--genui-spacing));
+}
+
+.genui-skeleton-block {
+  background: var(--genui-bg);
+  border: 1px solid var(--genui-border);
+  border-radius: var(--genui-radius);
+  padding: calc(20px * var(--genui-spacing));
+  box-shadow: var(--genui-shadow-sm);
+}
+
+.genui-skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--genui-border) 25%, #f1f5f9 50%, var(--genui-border) 75%);
+  background-size: 200% 100%;
+  animation: genui-shimmer 1.8s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+.genui-skeleton-line.short { width: 60%; }
+.genui-skeleton-line.medium { width: 80%; }
+.genui-skeleton-line.tall { height: 120px; border-radius: var(--genui-radius-sm); }
+.genui-skeleton-line.circle { width: 48px; height: 48px; border-radius: 50%; }
+
+.genui-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--genui-accent);
+  border-radius: 0 2px 2px 0;
+  animation: genui-loading-progress 2s ease-in-out infinite;
+  z-index: 10000;
+}
+
+@keyframes genui-loading-progress {
+  0% { width: 0; }
+  50% { width: 70%; }
+  100% { width: 95%; }
+}
+
+/* ── Buttons ── */
+button {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--genui-transition);
+}
+
+button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-0.5px);
+}
+
+button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ── Inputs ── */
+input, textarea {
+  transition: border-color var(--genui-transition), box-shadow var(--genui-transition);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--genui-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--genui-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--genui-muted); }
+
+/* ── Utility ── */
+.genui-accent { color: var(--genui-accent); }
 .genui-accent-bg {
   background: var(--genui-accent);
   color: var(--genui-accent-fg);
-  border-radius: var(--genui-radius);
-  padding: calc(4px * var(--genui-spacing)) calc(10px * var(--genui-spacing));
+  border-radius: var(--genui-radius-sm);
+  padding: calc(4px * var(--genui-spacing)) calc(12px * var(--genui-spacing));
 }

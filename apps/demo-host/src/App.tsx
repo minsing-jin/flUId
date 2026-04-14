@@ -106,7 +106,12 @@ export function App(): ReactElement {
   const runPrompt = useCallback(
     async (inputPrompt: string, selected?: UseCase) => {
       const effectivePlanner = planner ?? new MockPlanner();
-      setStatus("running");
+      setStatus("generating...");
+
+      // Show loading skeleton while generating
+      if (mountRef.current && rendererRef.current) {
+        rendererRef.current.showLoading(mountRef.current);
+      }
       try {
         if ("planWithResponse" in effectivePlanner && planner) {
           const response = await planner.planWithResponse(inputPrompt, {
