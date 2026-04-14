@@ -1,4 +1,4 @@
-import { createElement, type ReactElement } from "react";
+import { createElement, useState, useCallback, type ReactElement } from "react";
 
 /**
  * A declarative UI node that GPT can compose freely.
@@ -51,6 +51,85 @@ function renderChildren(children: DeclNode[] | undefined): ReactElement[] {
   return children.map((child, i) => renderNode(child, i));
 }
 
+const LAYOUT_ELEMENTS = new Set(["grid", "flex", "stack", "container", "section", "box", "card"]);
+
+/**
+ * Draggable layout children — wraps each child in a drag handle.
+ * Only applies to layout primitives (grid, flex, stack, card, container).
+ */
+function DraggableChildren(props: { children: DeclNode[]; parentStyle: React.CSSProperties }): ReactElement {
+  const [items, setItems] = useState(props.children);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+
+  // Sync if parent changes
+  if (props.children.length !== items.length) {
+    setItems(props.children);
+  }
+
+  const onDragStart = useCallback((idx: number, e: React.DragEvent) => {
+    setDragIdx(idx);
+    e.dataTransfer.effectAllowed = "move";
+    (e.currentTarget as HTMLElement).style.opacity = "0.4";
+    (e.currentTarget as HTMLElement).style.transform = "scale(0.97)";
+  }, []);
+
+  const onDragEnd = useCallback((e: React.DragEvent) => {
+    (e.currentTarget as HTMLElement).style.opacity = "1";
+    (e.currentTarget as HTMLElement).style.transform = "none";
+    if (dragIdx !== null && overIdx !== null && dragIdx !== overIdx) {
+      const next = [...items];
+      const [moved] = next.splice(dragIdx, 1);
+      if (moved) {
+        next.splice(overIdx, 0, moved);
+        setItems(next);
+      }
+    }
+    setDragIdx(null);
+    setOverIdx(null);
+  }, [dragIdx, overIdx, items]);
+
+  const onDragOver = useCallback((idx: number, e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setOverIdx(idx);
+  }, []);
+
+  return createElement("div", { style: props.parentStyle },
+    items.map((child, i) =>
+      createElement("div", {
+        key: i,
+        draggable: true,
+        onDragStart: (e: React.DragEvent) => onDragStart(i, e),
+        onDragEnd,
+        onDragOver: (e: React.DragEvent) => onDragOver(i, e),
+        onDrop: (e: React.DragEvent) => e.preventDefault(),
+        style: {
+          cursor: "grab",
+          transition: "all 200ms cubic-bezier(0.4,0,0.2,1)",
+          borderRadius: "var(--genui-radius-sm, 8px)",
+          border: overIdx === i ? "2px solid var(--genui-accent, #4f46e5)" : "2px solid transparent",
+          padding: overIdx === i ? 2 : 0
+        }
+      }, renderNode(child, i))
+    )
+  );
+}
+
+/**
+ * Render layout children — if the parent is a layout element, make children draggable.
+ * Otherwise render normally.
+ */
+function renderLayoutChildren(parentElement: string, children: DeclNode[] | undefined, parentStyle: React.CSSProperties): ReactElement {
+  if (!children || children.length === 0) {
+    return createElement("div", { style: parentStyle });
+  }
+  if (LAYOUT_ELEMENTS.has(parentElement) && children.length > 1) {
+    return createElement(DraggableChildren, { children, parentStyle });
+  }
+  return createElement("div", { style: parentStyle }, renderChildren(children));
+}
+
 const s = (base: React.CSSProperties, custom?: Record<string, string | number>): React.CSSProperties => ({
   ...base,
   ...(custom as React.CSSProperties)
@@ -93,40 +172,42 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
         whiteSpace: "pre-wrap"
       }, custom) }, str(node.value));
 
-    /* ── Layout ── */
+    /* ── Layout (draggable children) ── */
     case "card":
-      return createElement("div", { key, style: s({
+      return renderLayoutChildren("card", node.children, s({
         background: "var(--genui-bg, #fff)",
         border: "1px solid var(--genui-border, #e2e8f0)",
         borderRadius: "var(--genui-radius, 8px)",
-        padding: "calc(14px * var(--genui-spacing, 1))"
-      }, custom) }, kids);
+        padding: "calc(14px * var(--genui-spacing, 1))",
+        boxShadow: "var(--genui-shadow-sm, 0 1px 2px rgba(0,0,0,0.04))",
+        transition: "box-shadow 200ms ease"
+      }, custom));
 
     case "grid": {
       const cols = num(node.columns, 2);
-      return createElement("div", { key, style: s({
+      return renderLayoutChildren("grid", node.children, s({
         display: "grid",
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gap: `calc(12px * var(--genui-spacing, 1))`
-      }, custom) }, kids);
+      }, custom));
     }
 
     case "flex":
-      return createElement("div", { key, style: s({
+      return renderLayoutChildren("flex", node.children, s({
         display: "flex",
         flexDirection: str(node.direction, "row") as React.CSSProperties["flexDirection"],
         gap: `calc(${num(node.gap, 8)}px * var(--genui-spacing, 1))`,
         alignItems: str(node.align, "stretch"),
         justifyContent: str(node.justify, "flex-start"),
         flexWrap: node.wrap ? "wrap" : "nowrap"
-      }, custom) }, kids);
+      }, custom));
 
     case "stack":
-      return createElement("div", { key, style: s({
+      return renderLayoutChildren("stack", node.children, s({
         display: "flex",
         flexDirection: "column",
         gap: `calc(${num(node.gap, 8)}px * var(--genui-spacing, 1))`
-      }, custom) }, kids);
+      }, custom));
 
     /* ── Display ── */
     case "badge":
@@ -275,11 +356,11 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
       ]);
     }
 
-    /* ── Container (generic wrapper) ── */
+    /* ── Container (generic wrapper, draggable children) ── */
     case "container":
     case "section":
     case "box":
-      return createElement("div", { key, style: s({}, custom) }, kids);
+      return renderLayoutChildren(node.element, node.children, s({}, custom));
 
     /* ── Unknown → safe fallback ── */
     default:
