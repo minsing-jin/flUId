@@ -5,7 +5,9 @@ import {
   WorkbenchRuntime,
   FeedMode,
   seedSkillpacks,
-  type UIPlan
+  DefaultConnectorRegistry,
+  type UIPlan,
+  type ConnectorResult
 } from "@genui/core";
 import { DefaultReactRenderer, applyTheme, WorkbenchDevTools, type DevToolsData } from "@genui/renderer-react";
 import { GPTPlanner, type GPTPlannerConfig } from "@genui/planner-core";
@@ -80,21 +82,96 @@ export function App(): ReactElement {
     });
   }, [byok]);
 
+  const connectorRef = useRef<DefaultConnectorRegistry | null>(null);
+  if (!connectorRef.current) {
+    connectorRef.current = new DefaultConnectorRegistry();
+  }
+
   // Auto-load a welcome demo plan on first render
   useEffect(() => {
     const mock = new MockPlanner();
     const welcome = mock.plan("daily ops dashboard");
     setPlan(welcome);
-    setStatus("welcome · mock");
+    setStatus("welcome · live");
   }, []);
 
+  // Render plan + start live data subscriptions
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (!mountRef.current || !plan) return;
     rendererRef.current = rendererRef.current ?? new DefaultReactRenderer();
-    if (plan) {
-      rendererRef.current.renderPlan(plan, runtime, mountRef.current);
-      applyTheme(mountRef.current, plan.theme);
-    }
+    rendererRef.current.renderPlan(plan, runtime, mountRef.current);
+    applyTheme(mountRef.current, plan.theme);
+
+    // Subscribe to mock data for live updates
+    const connector = connectorRef.current;
+    if (!connector) return;
+    connector.unsubscribeAll();
+
+    // Determine which mock scenario to use based on plan intent
+    const scenario = plan.intent === "analysis" || plan.intent === "sales"
+      ? "sales-kpi"
+      : plan.intent === "marketing"
+        ? "marketing"
+        : plan.intent === "ops"
+          ? "server-status"
+          : "traffic";
+
+    // Subscribe for live KPI updates
+    connector.subscribeTo(
+      { id: "live-kpi", type: "mock", source: scenario, refreshMs: 3000 },
+      (result: ConnectorResult) => {
+        if (!result.data || !plan || !mountRef.current || !rendererRef.current) return;
+        const data = result.data as Record<string, number>;
+        const kpiBlock = plan.blocks.find((b) => b.type === "KPIGrid");
+        if (!kpiBlock) return;
+
+        const items = Array.isArray(kpiBlock.props.items) ? [...kpiBlock.props.items] : [];
+        const entries = Object.entries(data);
+        for (let i = 0; i < Math.min(items.length, entries.length); i++) {
+          const [, val] = entries[i] ?? [];
+          if (val === undefined) continue;
+          const item = items[i] as Record<string, unknown> | undefined;
+          if (!item) continue;
+          const formatted = typeof val === "number"
+            ? val > 10000 ? `${(val / 1000).toFixed(0)}K`
+              : val > 1000 ? `${(val / 1000).toFixed(1)}K`
+                : val < 1 ? `${val}` // percentage
+                  : val % 1 !== 0 ? `${val.toFixed(1)}%`
+                    : `${val.toLocaleString()}`
+            : String(val);
+          items[i] = { ...item, value: formatted };
+        }
+
+        const updatedPlan = {
+          ...plan,
+          blocks: plan.blocks.map((b) =>
+            b.id === kpiBlock.id ? { ...b, props: { ...b.props, items } } : b
+          )
+        };
+        rendererRef.current.update(updatedPlan);
+      }
+    );
+
+    // Subscribe for live chart updates
+    connector.subscribeTo(
+      { id: "live-chart", type: "mock", source: "timeseries", refreshMs: 5000 },
+      (result: ConnectorResult) => {
+        if (!result.data || !plan || !mountRef.current || !rendererRef.current) return;
+        const ts = result.data as { labels: string[]; values: number[] };
+        const chartBlock = plan.blocks.find((b) => b.type === "ChartBlock");
+        if (!chartBlock) return;
+
+        const updatedPlan = {
+          ...plan,
+          blocks: plan.blocks.map((b) =>
+            b.id === chartBlock.id ? { ...b, props: { ...b.props, labels: ts.labels, series: [{ name: "live", data: ts.values }] } } : b
+          )
+        };
+        rendererRef.current.update(updatedPlan);
+      }
+    );
+
+    return () => { connector.unsubscribeAll(); };
   }, [plan, runtime]);
 
   const appendDevData = useCallback(

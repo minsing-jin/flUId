@@ -6,3 +6,4 @@ export * from "./bindings/index.js";
 export * from "./patches/index.js";
 export * from "./telemetry/index.js";
 export * from "./examples/index.js";
+export * from "./connectors/index.js";

@@ -124,6 +124,12 @@ body {
   }
 }
 
+@keyframes genui-value-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
 @keyframes genui-skeleton-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.8; }
