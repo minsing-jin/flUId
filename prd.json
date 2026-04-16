@@ -700,7 +700,7 @@
     },
     {
       "id": "S041",
-      "title": "M-Flex — GenericRenderer 프리미티브 엔진 (21 primitives)",
+      "title": "M-Flex — GenericRenderer 프리미티브 엔진 (22 primitives)",
       "status": "done",
       "priority": "P0",
       "milestone": "M-Flex",
@@ -739,7 +739,7 @@
       "milestone": "M-Flex",
       "acceptance_criteria": [
         "system prompt에 'Flexible Block Types' 섹션 포함",
-        "21 프리미티브 목록 + 사용 예시",
+        "22 프리미티브 목록 + 사용 예시",
         "GPT가 아무 type이든 자유 발명 가능",
         "MockPlanner에 UserProfile, WeatherWidget 데모 템플릿",
         "fuzzy keyword matching (2+ keyword 일치 시 템플릿 매치)"

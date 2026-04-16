@@ -46,7 +46,7 @@
 
 ### Added
 - `packages/renderer-react/src/generic/` — Generic Declarative Renderer
-  - `DeclNode` 타입 + 21 프리미티브 (text, heading, code, card, grid, flex, stack, container, section, box, badge, progress, image, divider, spacer, alert, button, input, link, select, list, table)
+  - `DeclNode` 타입 + 22 프리미티브 (text, heading, code, card, grid, flex, stack, container, section, box, badge, progress, image, divider, spacer, alert, button, input, link, select, list, table)
   - FORBIDDEN_KEYS 검증 (innerHTML/eval/onclick 등 차단)
   - 재귀 children 렌더링, theme CSS vars 지원
 - DefaultReactRenderer에 Generic fallback 자동 라우팅 — 미등록 type은 Generic Renderer가 처리

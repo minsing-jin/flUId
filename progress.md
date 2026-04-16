@@ -61,7 +61,7 @@
 
 ## 2026-04-14 — M-Flex (Generic Declarative Renderer)
 - Seed: `seeds/generic-renderer.yaml` ambiguity 0.08.
-- S041 PASS: 21 프리미티브 (text, heading, code, card, grid, flex, stack, container, section, box, badge, progress, image, divider, spacer, alert, button, input, link, list, table). FORBIDDEN_KEYS 보안 검증.
+- S041 PASS: 22 프리미티브 (text, heading, code, card, grid, flex, stack, container, section, box, badge, progress, image, divider, spacer, alert, button, input, link, select, list, table). FORBIDDEN_KEYS 보안 검증.
 - S042 PASS: DefaultReactRenderer에 Generic fallback 자동 라우팅.
 - S043 PASS: GPT prompt에 프리미티브 가이드 + Mock 데모 (UserProfile, WeatherWidget).
 - S044 Evaluate: 12/12 AC, 48/48 tests, quality 0.94. Ralph: 브라우저 3종 시나리오 검증.
