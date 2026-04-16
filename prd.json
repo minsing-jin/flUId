@@ -697,6 +697,328 @@
         "unit test로 zod→JSON schema 변환 검증"
       ],
       "files": ["packages/planner-core/src/schema-converter.ts", "packages/planner-core/src/transport.ts"]
+    },
+    {
+      "id": "S041",
+      "title": "M-Flex — GenericRenderer 프리미티브 엔진 (21 primitives)",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Flex",
+      "acceptance_criteria": [
+        "DeclNode 타입과 21개 프리미티브 구현",
+        "text, heading, code, card, grid, flex, stack, container, section, box 포함",
+        "badge, progress, image, divider, spacer, alert 포함",
+        "button, input, link, select, list, table 포함",
+        "children 재귀 렌더링 + theme CSS vars 지원",
+        "FORBIDDEN_KEYS로 script/eval/innerHTML 등 위험 원소 차단",
+        "unsafe 검사 실패 시 명시적 경고 블록 렌더"
+      ],
+      "files": [
+        "packages/renderer-react/src/generic/renderer.ts",
+        "packages/renderer-react/src/generic/index.ts"
+      ]
+    },
+    {
+      "id": "S042",
+      "title": "M-Flex — DefaultReactRenderer에 Generic fallback 라우팅",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Flex",
+      "acceptance_criteria": [
+        "reactComponentMap 조회 우선",
+        "없는 type은 renderGenericBlock으로 자동 라우팅",
+        "기존 등록 컴포넌트 보존 (backward compat)"
+      ],
+      "files": ["packages/renderer-react/src/render/index.ts"]
+    },
+    {
+      "id": "S043",
+      "title": "M-Flex — GPT 프롬프트에 프리미티브 가이드 + Mock 데모",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Flex",
+      "acceptance_criteria": [
+        "system prompt에 'Flexible Block Types' 섹션 포함",
+        "21 프리미티브 목록 + 사용 예시",
+        "GPT가 아무 type이든 자유 발명 가능",
+        "MockPlanner에 UserProfile, WeatherWidget 데모 템플릿",
+        "fuzzy keyword matching (2+ keyword 일치 시 템플릿 매치)"
+      ],
+      "files": [
+        "packages/planner-core/src/prompt-builder.ts",
+        "apps/demo-host/src/planner.ts"
+      ]
+    },
+    {
+      "id": "S044",
+      "title": "M-Flex — 게이트 검증 + Evaluate + Ralph",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Flex",
+      "acceptance_criteria": [
+        "12/12 AC pass",
+        "48/48 tests green",
+        "3 프롬프트 브라우저 검증 (profile, weather, unknown)"
+      ],
+      "files": []
+    },
+    {
+      "id": "S045",
+      "title": "M-UX — 로딩 스켈레톤 + fade-in 애니메이션",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "SkeletonUI 컴포넌트에 shimmer 애니메이션",
+        "상단 로딩 바 (genui-loading-bar)",
+        "renderer.showLoading() API",
+        "완료 시 genui-fade-in 트랜지션"
+      ],
+      "files": [
+        "packages/renderer-react/src/render/index.ts",
+        "packages/renderer-react/src/theme/tokens.css"
+      ]
+    },
+    {
+      "id": "S046",
+      "title": "M-UX — 시각 퀄리티 업그레이드 (그림자·호버·트랜지션)",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "shadow-sm/md/lg 3단계 시스템",
+        "블록 호버 시 translateY(-1px) + shadow-md",
+        "200ms cubic-bezier 트랜지션",
+        "radius 12/8/16 3단계",
+        "input focus ring (accent color)",
+        "scrollbar 스타일링"
+      ],
+      "files": ["packages/renderer-react/src/theme/tokens.css"]
+    },
+    {
+      "id": "S047",
+      "title": "M-UX — 블록 드래그앤드롭 재배치",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "DraggableBlock 래퍼 (HTML5 Drag API)",
+        "draggable=true 속성",
+        "드래그 중 opacity + scale",
+        "드롭 타겟 하이라이트 (accent border)",
+        "drop 시 plan.blocks 순서 업데이트"
+      ],
+      "files": ["packages/renderer-react/src/render/index.ts"]
+    },
+    {
+      "id": "S048",
+      "title": "M-UX — 인터랙티브 버튼/입력 (시각 피드백)",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "button:hover brightness + translateY",
+        "button:active scale",
+        "input:focus 보라색 glow ring"
+      ],
+      "files": ["packages/renderer-react/src/theme/tokens.css"]
+    },
+    {
+      "id": "S049",
+      "title": "M-UX — 게이트 + Evaluate + Ralph",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "shadows 적용 확인",
+        "draggable 요소 존재",
+        "browser errors 0"
+      ],
+      "files": []
+    },
+    {
+      "id": "S050",
+      "title": "M-UX — 레이아웃 내부 컴포넌트 드래그앤드롭",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-UX",
+      "acceptance_criteria": [
+        "Generic Renderer의 grid/flex/stack/card/container children 드래그 가능",
+        "DraggableChildren 래퍼 (재귀 중첩 지원)",
+        "드래그 중 opacity 0.4 + scale 0.97",
+        "드롭 타겟 accent 테두리 2px",
+        "무한 중첩 깊이 지원"
+      ],
+      "files": ["packages/renderer-react/src/generic/renderer.ts"]
+    },
+    {
+      "id": "S051",
+      "title": "M-Data — DataConnector 어댑터 레이어",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "DataConnector 인터페이스 + ConnectorConfig 타입",
+        "RestConnector (GET/POST, polling, transform)",
+        "CsvConnector (인라인 CSV 파싱)",
+        "MockConnector (5 시나리오: sales-kpi/traffic/server-status/marketing/timeseries)",
+        "Static connector (인라인 JSON)",
+        "DefaultConnectorRegistry로 type → connector 매핑",
+        "subscribeTo API (구독 + 자동 해제)"
+      ],
+      "files": [
+        "packages/core/src/connectors/types.ts",
+        "packages/core/src/connectors/rest-connector.ts",
+        "packages/core/src/connectors/csv-connector.ts",
+        "packages/core/src/connectors/mock-connector.ts",
+        "packages/core/src/connectors/registry.ts",
+        "packages/core/src/connectors/index.ts"
+      ]
+    },
+    {
+      "id": "S052",
+      "title": "M-Data — Live Mock 시뮬레이터 (시간 변화 + 인터랙션)",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "MockConnector에 5개 시나리오",
+        "각 시나리오는 tick마다 다른 데이터 생성 (sin + random)",
+        "sales-kpi: revenue/orders/avgOrder/conversion",
+        "traffic: activeUsers/sessions/bounceRate/avgDuration",
+        "server-status: cpu/memory/requests/errors",
+        "marketing: impressions/clicks/ctr/spend",
+        "timeseries: 7일치 라벨+값",
+        "subscribe 시 자동 polling, 지정된 refreshMs 간격"
+      ],
+      "files": ["packages/core/src/connectors/mock-connector.ts"]
+    },
+    {
+      "id": "S053",
+      "title": "M-Data — SmartMockPlanner에 DataConnector 연결 + 렌더링 속도 개선",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "demo-host App.tsx에 connectorRef 생성",
+        "plan 로드 시 intent 기반 시나리오 자동 선택",
+        "KPI 3s, 차트 5s 주기로 live update",
+        "renderer.update() partial re-render",
+        "값 자동 포맷팅 (1.2K, 99.97%, $284K)"
+      ],
+      "files": ["apps/demo-host/src/App.tsx"]
+    },
+    {
+      "id": "S054",
+      "title": "M-Data — M-Data 사이클 Evaluate + Ralph",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "HTML이 실시간 변화 확인 (t=5s vs t=9s 비교)",
+        "8/8 typecheck, 48/48 tests"
+      ],
+      "files": []
+    },
+    {
+      "id": "S055",
+      "title": "M-Data — ConnectorPanel 사용자 REST URL 입력 UI",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "사이드바에 Data Sources 섹션",
+        "name + type(REST|Mock) + URL + refreshMs 입력",
+        "localStorage 영속화",
+        "활성화 토글 + 삭제",
+        "상태 인디케이터 (green/red/grey dot)",
+        "여러 데이터 소스 동시 관리"
+      ],
+      "files": ["apps/demo-host/src/connector-panel.tsx"]
+    },
+    {
+      "id": "S056",
+      "title": "M-Data — 인터랙티브 select 프리미티브 + action dispatch",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "Generic Renderer에 select 프리미티브 추가",
+        "button onClick → genui:action custom event",
+        "input onChange → input.change event",
+        "select onChange → select.change event",
+        "App.tsx 전역 리스너로 상태 바 업데이트",
+        "GENERIC_PRIMITIVES에 select 포함"
+      ],
+      "files": [
+        "packages/renderer-react/src/generic/renderer.ts",
+        "apps/demo-host/src/App.tsx"
+      ]
+    },
+    {
+      "id": "S057",
+      "title": "M-Data — GPT/Mock 생성 dataSources 자동 connector 연결",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "DataSource 타입에 connector 필드 추가 (type, source, refreshMs, targetBlockId 등)",
+        "zod schema 확장",
+        "App.tsx에서 plan.dataSources[].connector 자동 subscribe",
+        "SmartMockPlanner가 생성 plan에 connector 첨부",
+        "TargetBlockId로 특정 블록에 데이터 주입"
+      ],
+      "files": [
+        "packages/core/src/dsl/types.ts",
+        "packages/core/src/dsl/schemas.ts",
+        "apps/demo-host/src/App.tsx",
+        "apps/demo-host/src/planner.ts"
+      ]
+    },
+    {
+      "id": "S058",
+      "title": "M-Data — Evaluate + Ralph (최종)",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-Data",
+      "acceptance_criteria": [
+        "ConnectorPanel 사이드바 표시",
+        "Add 버튼 존재",
+        "KPI 실데이터 반영 ($1.2M, 8,420, $142)",
+        "8/8 typecheck",
+        "48/48 tests"
+      ],
+      "files": []
+    },
+    {
+      "id": "S059",
+      "title": "M-JARVIS — Smart MockPlanner 키워드 분석",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-JARVIS",
+      "acceptance_criteria": [
+        "MockPlanner.smartGenerate() 메서드",
+        "9가지 intent 감지: dashboard, sales, marketing, task, profile, chart, table, map, weather",
+        "intent별 KPI items (sales=revenue/orders, marketing=impressions/clicks 등)",
+        "intent에 따른 theme.mood 자동 선택",
+        "Your Request 빈 fallback 제거",
+        "항상 의미 있는 UI 생성"
+      ],
+      "files": ["apps/demo-host/src/planner.ts"]
+    },
+    {
+      "id": "S060",
+      "title": "M-JARVIS — 블록 stagger 등장 애니메이션",
+      "status": "done",
+      "priority": "P0",
+      "milestone": "M-JARVIS",
+      "acceptance_criteria": [
+        "genui-block-enter keyframes (opacity+translateY+scale+blur)",
+        "nth-child 선택자로 80ms stagger",
+        "1~8 블록까지 개별 delay",
+        "9번째 이상은 640ms delay"
+      ],
+      "files": ["packages/renderer-react/src/theme/tokens.css"]
     }
   ]
 }

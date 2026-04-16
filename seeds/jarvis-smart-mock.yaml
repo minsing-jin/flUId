@@ -1,0 +1,28 @@
+goal: >
+  API 키 없는 사용자에게도 "자비스 같은" 경험을 제공한다. 아무 프롬프트든
+  SmartMockPlanner가 키워드를 분석해 의미 있는 UI를 생성하고, 블록이 순차적으로
+  등장하는 stagger 애니메이션과 blur→clear 효과로 AI가 지금 뭔가 만들고 있는 듯한
+  느낌을 준다. "Your Request" 같은 빈 껍데기 fallback은 제거한다.
+
+constraints:
+  - 기존 backward compat
+  - API 키 없이도 풍부한 UI가 나와야 함
+  - 키워드 분석은 로컬 (GPT 호출 없음)
+  - 기존 48 tests 유지
+  - TypeScript strict
+
+acceptance_criteria:
+  - smartGenerate() 메서드가 prompt의 키워드를 분석
+  - 감지 의도: sales, marketing, task, profile, chart, table, map, weather, dashboard
+  - 각 의도별 실제 숫자/텍스트로 채워진 KPI/차트/테이블 생성
+  - theme.mood가 의도에 따라 자동 선택 (sales=serious, marketing=vivid, task=minimal)
+  - "Your Request" 빈 fallback 제거 — 항상 의미 있는 UI 생성
+  - 블록 순차 등장 — 80ms stagger, 최대 8블록까지
+  - 등장 효과 — opacity 0→1, translateY 20→0, scale 0.96→1, blur 4→0
+  - typecheck 8/8, test 전원 통과
+  - 브라우저에서 4개 다른 프롬프트로 서로 다른 UI 확인
+
+metadata:
+  ambiguity_score: 0.07
+  milestone: M-JARVIS
+  created: 2026-04-14

@@ -40,3 +40,61 @@
 - S029 PASS: 문서 8종 (quickstart/architecture/security/cost/devtools/theme/roadmap + CHANGELOG).
 - Evaluation PASS: `pnpm --filter '!@genui/demo-host' run typecheck` 7/7 패키지 통과. core `pnpm test` 21/21 green (theme 7 + csp 8 + 기존 6).
 - Known: planner-core tests와 demo-host 런타임은 `pnpm install` 필요. 본 이터레이션은 네트워크 차단 환경에서 진행되어 install 없이 정적 검증까지만 수행.
+
+## 2026-04-13 — M2+M3 (Ouroboros 정석 사이클)
+- Seed: S030-S040 prd.json 등록 (ambiguity 0.1 영역).
+- Run (스토리별 개별 게이트):
+  - S030 PASS: ResponseCache (hash + TTL 10min + LRU 50), getResponseCache() API.
+  - S031 PASS: Provider 추상화 — OpenAIProvider, AnthropicProvider, LocalProvider(Ollama).
+  - S032 PASS: LLM-as-judge 5번째 안전 레이어, JudgeResult 반환.
+  - S033 PASS: WorkbenchRuntime.loadSkillpack / unloadSkillpack + 자동 CSP rebuild.
+  - S034 PASS: CLI `genui dev [--gpt-spark]` + `genui import-tokens`.
+  - S035 PASS: WebSocketFeedMode — auto-reconnect, backpressure, DataSource.feedUrl.
+  - S036 PASS: MultiAgentPlanner (IntentRouter → SkillSelector → UIGenerator).
+  - S037 PASS: WidgetEventBus (topic allowlist per widget, scoped pub/sub).
+  - S038 PASS: accessibilityCheck (ARIA/label/contrast 자동 진단).
+  - S039 PASS: Figma Variables + Style Dictionary 토큰 import.
+  - S040 PASS: zodToJsonSchema 변환기 (OpenAI structured output).
+- Evolve: S030 AC4 "GPTPlanner 통합 미완" 발견 → planWithResponse에 cache get/set 통합 수정.
+- Evaluate: 57/57 AC pass, 48/48 tests (core 21 + planner 27), quality 0.91 weighted.
+- Ralph: 전원 통과.
+
+## 2026-04-14 — M-Flex (Generic Declarative Renderer)
+- Seed: `seeds/generic-renderer.yaml` ambiguity 0.08.
+- S041 PASS: 21 프리미티브 (text, heading, code, card, grid, flex, stack, container, section, box, badge, progress, image, divider, spacer, alert, button, input, link, list, table). FORBIDDEN_KEYS 보안 검증.
+- S042 PASS: DefaultReactRenderer에 Generic fallback 자동 라우팅.
+- S043 PASS: GPT prompt에 프리미티브 가이드 + Mock 데모 (UserProfile, WeatherWidget).
+- S044 Evaluate: 12/12 AC, 48/48 tests, quality 0.94. Ralph: 브라우저 3종 시나리오 검증.
+
+## 2026-04-14 — M-UX (Loading · Shadows · DnD)
+- Seed: `seeds/ux-overhaul.yaml` ambiguity 0.05.
+- S045 PASS: 로딩 스켈레톤 (shimmer + 로딩 바), fade-in 트랜지션.
+- S046 PASS: shadow-sm/md/lg, hover lift, 200ms cubic-bezier, radius 3단계.
+- S047 PASS: 블록 드래그앤드롭 (HTML5 Drag API, drop target highlight).
+- S048 PASS: 인터랙티브 피드백 (button hover/active, input focus ring).
+- S049 Evaluate: 8/8 typecheck, 48/48 tests, 드래그 요소 확인.
+- S050 PASS: 레이아웃 내부 컴포넌트 드래그 (DraggableChildren, 재귀 중첩, 32개 드래그 요소 확인).
+
+## 2026-04-14 — M-JARVIS (Smart Mock + Stagger)
+- Seed: `seeds/jarvis-smart-mock.yaml` ambiguity 0.07.
+- S059 PASS: SmartMockPlanner.smartGenerate() — 9가지 intent 감지, 의도별 KPI/차트/테이블/상태 생성, theme.mood 자동 선택. "Your Request" fallback 제거.
+- S060 PASS: blur→clear 블록 stagger 등장 (80ms 간격, nth-child CSS).
+- Evolve: Block 타입 import 누락 수정.
+- Ralph: 4개 프롬프트(매출/마케팅/할일/아무거나) 모두 풍부한 UI 생성 확인.
+
+## 2026-04-16 — M-Data (DataConnector · Live Simulation)
+- Seed: `seeds/data-integration.yaml` ambiguity 0.08.
+- S051 PASS: DataConnector 레이어 — RestConnector, CsvConnector, MockConnector (5시나리오), Static, DefaultConnectorRegistry.
+- S052 PASS: Live Mock 시뮬레이터 (sin + random 기반 시간 변화 데이터).
+- S053 PASS: App.tsx connectorRef 통합 — intent 기반 자동 subscribe, KPI 3s / 차트 5s.
+- S054 Evaluate: HTML t=5s vs t=9s 실제 변화 확인.
+- S055 PASS: ConnectorPanel 사이드바 UI — REST URL 입력, localStorage 영속화, 활성 토글, 상태 dot.
+- S056 PASS: select 프리미티브 + genui:action 커스텀 이벤트 dispatch.
+- S057 PASS: DataSource.connector 필드 + 자동 subscribe + SmartMockPlanner가 connector 첨부.
+- S058 Ralph: ConnectorPanel 렌더 확인, KPI 실데이터 반영, 8/8 typecheck, 48/48 tests.
+
+## Gap Fill — 2026-04-16
+- S041-S060 prd.json에 소급 등록 (이전 이터레이션에서 구현만 됐고 문서 미반영).
+- `seeds/jarvis-smart-mock.yaml` 소급 생성.
+- progress.md 이터레이션 로그 보강 (본 섹션).
+- CHANGELOG.md 업데이트.
