@@ -52,6 +52,17 @@ export type DataSource = {
   meta?: Record<string, unknown>;
   pollIntervalMs?: number;
   feedUrl?: string;
+  /** Connector config for auto-fetching real data */
+  connector?: {
+    type: "rest" | "csv" | "mock" | "static";
+    source: string;
+    refreshMs?: number;
+    method?: "GET" | "POST";
+    headers?: Record<string, string>;
+    transform?: string;
+    /** Target block id to inject data into (KPIGrid, ChartBlock, DataTable) */
+    targetBlockId?: string;
+  };
 };
 
 export type Block = {

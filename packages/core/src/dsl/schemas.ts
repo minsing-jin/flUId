@@ -62,7 +62,19 @@ export const dataSourceSchema = z
     data: z.unknown().optional(),
     meta: z.record(z.unknown()).optional(),
     pollIntervalMs: z.number().int().positive().optional(),
-    feedUrl: z.string().url().optional()
+    feedUrl: z.string().url().optional(),
+    connector: z
+      .object({
+        type: z.enum(["rest", "csv", "mock", "static"]),
+        source: z.string(),
+        refreshMs: z.number().int().nonnegative().optional(),
+        method: z.enum(["GET", "POST"]).optional(),
+        headers: z.record(z.string()).optional(),
+        transform: z.string().optional(),
+        targetBlockId: z.string().optional()
+      })
+      .strict()
+      .optional()
   })
   .strict();
 

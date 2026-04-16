@@ -12,6 +12,7 @@ import {
 import { DefaultReactRenderer, applyTheme, WorkbenchDevTools, type DevToolsData } from "@genui/renderer-react";
 import { GPTPlanner, type GPTPlannerConfig } from "@genui/planner-core";
 import { BYOKPanel, type BYOKConfig } from "./byok.js";
+import { ConnectorPanel, type UserConnector } from "./connector-panel.js";
 import { useCases, type UseCase } from "./use-cases.js";
 import { MockPlanner } from "./planner.js";
 
@@ -45,6 +46,7 @@ function allowlistedComponentTypes(): string[] {
 export function App(): ReactElement {
   const runtime = useRuntime();
   const [byok, setByok] = useState<BYOKConfig>({ mode: "direct", apiKey: "", proxyUrl: "" });
+  const [userConnectors, setUserConnectors] = useState<UserConnector[]>([]);
   const [plan, setPlan] = useState<UIPlan | null>(null);
   const [prompt, setPrompt] = useState("");
   const [devVisible, setDevVisible] = useState(true);
@@ -95,6 +97,22 @@ export function App(): ReactElement {
     setStatus("welcome · live");
   }, []);
 
+  // Global interaction listener — button clicks, input changes, select changes
+  useEffect(() => {
+    const onAction = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { action: string; payload: unknown; source: string };
+      setStatus(`${detail.source} · ${detail.action}: ${JSON.stringify(detail.payload).slice(0, 40)}`);
+      // If the button action requests a new prompt, run it
+      if (detail.action === "prompt" && typeof detail.payload === "string") {
+        void runPromptRef.current?.(detail.payload);
+      }
+    };
+    globalThis.addEventListener("genui:action", onAction);
+    return () => globalThis.removeEventListener("genui:action", onAction);
+  }, []);
+
+  const runPromptRef = useRef<((p: string) => Promise<void>) | null>(null);
+
   // Render plan + start live data subscriptions
   useEffect(() => {
     if (!mountRef.current || !plan) return;
@@ -106,6 +124,61 @@ export function App(): ReactElement {
     const connector = connectorRef.current;
     if (!connector) return;
     connector.unsubscribeAll();
+
+    // Subscribe to plan.dataSources[].connector (auto-wired from GPT/Mock planner)
+    for (const ds of plan.dataSources) {
+      if (!ds.connector) continue;
+      const cfg = { id: `plan-${ds.id}`, ...ds.connector };
+      connector.subscribeTo(cfg, (result: ConnectorResult) => {
+        if (result.error || !result.data || !plan || !mountRef.current || !rendererRef.current) return;
+        const targetId = ds.connector?.targetBlockId;
+        const target = targetId ? plan.blocks.find((b) => b.id === targetId) : plan.blocks.find((b) => b.type === "KPIGrid");
+        if (!target) return;
+        const data = result.data;
+        if (typeof data !== "object" || data === null || Array.isArray(data)) return;
+        const entries = Object.entries(data as Record<string, unknown>).filter(([, v]) => typeof v === "number" || typeof v === "string");
+        if (entries.length === 0) return;
+        const items = entries.slice(0, 4).map(([k, v]) => ({
+          label: k,
+          value: String(v).length > 16 ? String(v).slice(0, 14) + "…" : String(v),
+          change: ""
+        }));
+        const updated = {
+          ...plan,
+          blocks: plan.blocks.map((b) => b.id === target.id ? { ...b, props: { ...b.props, items } } : b)
+        };
+        rendererRef.current.update(updated);
+      });
+    }
+
+    // Subscribe to user-added REST/mock connectors first (real data priority)
+    for (const uc of userConnectors) {
+      if (!uc.active) continue;
+      connector.subscribeTo(uc, (result: ConnectorResult) => {
+        setUserConnectors((prev) => prev.map((c) => c.id === uc.id
+          ? { ...c, lastStatus: result.error ? "error" : "ok", lastError: result.error }
+          : c
+        ));
+        if (result.error || !result.data || !plan || !mountRef.current || !rendererRef.current) return;
+        // Inject user data into first KPIGrid if it's a record of numbers
+        const data = result.data;
+        if (typeof data !== "object" || data === null || Array.isArray(data)) return;
+        const entries = Object.entries(data as Record<string, unknown>).filter(([, v]) => typeof v === "number" || typeof v === "string");
+        if (entries.length === 0) return;
+        const kpiBlock = plan.blocks.find((b) => b.type === "KPIGrid");
+        if (!kpiBlock) return;
+        const items = entries.slice(0, 4).map(([k, v]) => ({
+          label: `${uc.name} · ${k}`,
+          value: String(v).length > 16 ? String(v).slice(0, 14) + "…" : String(v),
+          change: ""
+        }));
+        const updated = {
+          ...plan,
+          blocks: plan.blocks.map((b) => b.id === kpiBlock.id ? { ...b, props: { ...b.props, items } } : b)
+        };
+        rendererRef.current.update(updated);
+      });
+    }
 
     // Determine which mock scenario to use based on plan intent
     const scenario = plan.intent === "analysis" || plan.intent === "sales"
@@ -172,7 +245,7 @@ export function App(): ReactElement {
     );
 
     return () => { connector.unsubscribeAll(); };
-  }, [plan, runtime]);
+  }, [plan, runtime, userConnectors]);
 
   const appendDevData = useCallback(
     (next: Partial<DevToolsData>) =>
@@ -236,6 +309,11 @@ export function App(): ReactElement {
     [planner, devData.planHistory, devData.costTimeline, appendDevData]
   );
 
+  // Keep ref updated so the global action listener can call the latest runPrompt
+  useEffect(() => {
+    runPromptRef.current = (p: string) => runPrompt(p);
+  }, [runPrompt]);
+
   const runUseCase = useCallback(
     (useCase: UseCase) => {
       setPrompt(useCase.prompt);
@@ -268,6 +346,7 @@ export function App(): ReactElement {
           "10 use cases · 3 trigger modes · shadcn-ready"
         ),
         createElement(BYOKPanel, { key: "byok", onChange: setByok }),
+        createElement(ConnectorPanel, { key: "connectors", onChange: setUserConnectors }),
         createElement(
           "section",
           { key: "prompt", style: { display: "flex", flexDirection: "column", gap: 6 } },

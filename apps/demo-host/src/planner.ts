@@ -389,8 +389,23 @@ export class MockPlanner implements Planner {
           ? { mood: "minimal" as const, density: "spacious" as const, accent: "emerald" }
           : { mood: "serious" as const, density: "comfortable" as const, accent: "indigo" };
 
+    // Wire a default mock connector for the first KPIGrid, so data is live even on Mock plans
+    const kpiBlock = blocks.find((b) => b.type === "KPIGrid");
+    const scenario = hasSales ? "sales-kpi" : hasMarketing ? "marketing" : hasDashboard ? "server-status" : "traffic";
+    const dataSources = kpiBlock ? [{
+      id: "auto-kpi",
+      kind: "json" as const,
+      connector: {
+        type: "mock" as const,
+        source: scenario,
+        refreshMs: 3000,
+        targetBlockId: kpiBlock.id
+      }
+    }] : [];
+
     return {
       ...basePlan(title, hasSales ? "analysis" : hasMarketing ? "marketing" : "custom", blocks),
+      dataSources,
       theme
     };
   }

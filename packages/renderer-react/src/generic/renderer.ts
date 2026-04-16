@@ -286,22 +286,35 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
 
     /* ── Interactive ── */
     case "button":
-      return createElement("button", { key, style: s({
-        padding: "8px 16px",
-        borderRadius: "var(--genui-radius, 6px)",
-        border: "none",
-        background: str(node.color, "var(--genui-accent, #4f46e5)"),
-        color: str(node.textColor, "var(--genui-accent-fg, #fff)"),
-        fontWeight: 600,
-        cursor: "pointer",
-        fontSize: 13
-      }, custom) }, str(node.value, "Button"));
+      return createElement("button", { key,
+        onClick: () => {
+          const action = str(node.action);
+          const payload = node.payload ?? str(node.value);
+          if (action) {
+            globalThis.dispatchEvent?.(new CustomEvent("genui:action", { detail: { action, payload, source: "button" } }));
+          }
+        },
+        style: s({
+          padding: "8px 16px",
+          borderRadius: "var(--genui-radius, 6px)",
+          border: "none",
+          background: str(node.color, "var(--genui-accent, #4f46e5)"),
+          color: str(node.textColor, "var(--genui-accent-fg, #fff)"),
+          fontWeight: 600,
+          cursor: "pointer",
+          fontSize: 13
+        }, custom)
+      }, str(node.value, "Button"));
 
     case "input":
       return createElement("input", { key,
         type: str(node.inputType, "text"),
         placeholder: str(node.placeholder),
         defaultValue: str(node.value),
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+          const name = str(node.name, "input");
+          globalThis.dispatchEvent?.(new CustomEvent("genui:action", { detail: { action: "input.change", payload: { name, value: e.target.value }, source: "input" } }));
+        },
         style: s({
           padding: "8px 12px",
           border: "1px solid var(--genui-border, #cbd5e1)",
@@ -311,6 +324,29 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
           width: "100%"
         }, custom)
       });
+
+    case "select": {
+      const options = Array.isArray(node.options) ? node.options : [];
+      return createElement("select", { key,
+        defaultValue: str(node.value),
+        onChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const name = str(node.name, "select");
+          globalThis.dispatchEvent?.(new CustomEvent("genui:action", { detail: { action: "select.change", payload: { name, value: e.target.value }, source: "select" } }));
+        },
+        style: s({
+          padding: "8px 12px",
+          border: "1px solid var(--genui-border, #cbd5e1)",
+          borderRadius: "var(--genui-radius, 6px)",
+          fontFamily: "inherit",
+          fontSize: 13,
+          background: "var(--genui-bg, #fff)",
+          cursor: "pointer"
+        }, custom)
+      }, options.map((opt, i) => {
+        const rec = typeof opt === "object" && opt !== null ? opt as Record<string, unknown> : { value: String(opt), label: String(opt) };
+        return createElement("option", { key: i, value: str(rec.value) }, str(rec.label, str(rec.value)));
+      }));
+    }
 
     case "link":
       return createElement("a", { key,
@@ -416,6 +452,6 @@ export const GENERIC_PRIMITIVES = [
   "text", "heading", "code",
   "card", "grid", "flex", "stack", "container", "section", "box",
   "badge", "progress", "image", "divider", "spacer", "alert",
-  "button", "input", "link",
+  "button", "input", "link", "select",
   "list", "table"
 ] as const;

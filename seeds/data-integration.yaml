@@ -1,0 +1,26 @@
+goal: >
+  flUId에 실제 데이터 연결과 인터랙션을 완성한다. (1) 사용자가 사이드바에서 REST URL을
+  입력하면 실시간 라이브 데이터로 KPI/차트가 동작, (2) 버튼/드롭다운 등 인터랙션이
+  실제로 데이터를 필터링/갱신, (3) GPT가 생성한 UIPlan의 dataSources가 실제 connector로
+  자동 연결되어 real data로 채워짐.
+
+constraints:
+  - 기존 backward compat
+  - TypeScript strict
+  - 기존 48 tests 유지
+  - CORS는 사용자 책임 (문서에 명시)
+
+acceptance_criteria:
+  - 사이드바에 DataSource 추가 UI (name + url + type selector)
+  - 추가된 URL이 실시간으로 fetch되고 KPI/차트에 주입됨
+  - select 프리미티브 추가 (Generic renderer에)
+  - 버튼 onClick, select onChange이 실제 상태 변경과 연결
+  - UIPlan.dataSources에 connector config 필드 지원 (zod 통과)
+  - GPT/Mock planner가 생성한 dataSources가 자동으로 subscribe
+  - 필터 상태 변경 시 화면이 즉시 반응
+  - typecheck 8/8, test 전원 통과
+  - 브라우저에서 REST URL 연결 → 실제 데이터 표시 확인
+
+metadata:
+  ambiguity_score: 0.08
+  milestone: M-Data
