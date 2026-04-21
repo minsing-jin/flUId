@@ -65,5 +65,29 @@ export const seedSkillpacks: SkillManifest[] = [
     tools: ["code.run_js", "tool.generate_stub"],
     suggestedPrompts: ["이 자리에서 차트 코드로 만들어", "새 툴 스텁 만들어줘"],
     allowedDomains: ["registry.npmjs.org", "esm.sh"]
+  },
+  {
+    id: "social-media",
+    name: "Social Media Hub",
+    version: "0.1.0",
+    description: "내 모든 SNS 계정을 한눈에 — Instagram X YouTube TikTok LinkedIn 프로필 피드 분석",
+    author: "genui",
+    categories: ["social", "analytics"],
+    permissionsRequested: ["network", "social_auth"],
+    components: ["SNSProfileCard", "SNSFeedGrid", "SNSAnalytics", "SNSPostPreview", "SNSLinkInBio"],
+    tools: ["sns.fetch_profile", "sns.fetch_feed", "sns.analytics", "sns.aggregate"],
+    suggestedPrompts: [
+      "내 모든 SNS 한눈에 보여줘",
+      "인스타랑 유튜브 비교해줘",
+      "이번 주 SNS 성과 분석",
+      "프로필 링크 페이지 만들어줘"
+    ],
+    allowedDomains: [
+      "graph.instagram.com",
+      "api.twitter.com",
+      "www.googleapis.com",
+      "open.tiktokapis.com",
+      "api.linkedin.com"
+    ]
   }
 ];

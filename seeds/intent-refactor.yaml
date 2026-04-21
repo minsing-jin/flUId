@@ -1,0 +1,34 @@
+goal: >
+  사용자의 전체 의도를 전수 검토하여 누락된 기능 갭을 채우고,
+  비대해진 App.tsx와 남발된 as unknown as 캐스트를 리팩터링한다.
+
+intent_coverage_audit:
+  - 사용자 이슈 #1 "SNS 통합 대시보드" 스킬팩 미구현 → 이번 사이클에 구현
+  - MultiAgentPlanner가 라이브러리로만 존재 → demo-host에서 토글 가능하게
+  - WebSocketFeedMode 인프라 존재 → connector-panel에 ws:// URL 지원 추가
+  - App.tsx가 445줄로 비대 → 구독/이벤트/렌더 훅으로 분해
+  - 16개의 as unknown as 캐스트 → 타입 안전성 개선 (zod 스키마 사용)
+
+constraints:
+  - 기존 74 tests 유지하거나 증가
+  - 8/8 typecheck 유지
+  - backward compat
+  - TypeScript strict
+  - 드래그앤드롭 유지
+
+acceptance_criteria:
+  - social-media 스킬팩이 seedSkillpacks에 등록 (SNSProfileCard 등 4 컴포넌트, Instagram/X/YouTube/TikTok/LinkedIn allowedDomains)
+  - SmartMockPlanner가 "SNS" 키워드 인식해서 멀티플랫폼 프로필 뷰 생성
+  - demo-host 사이드바에 Planner Mode 토글 (Single | Multi-Agent, GPT 키 있을 때만 활성)
+  - ConnectorPanel type selector에 "WebSocket" 옵션 추가, ws:// URL 지원
+  - App.tsx useLivePlanSubscriptions hook으로 구독 로직 추출
+  - App.tsx useGlobalActionListener hook으로 이벤트 분리
+  - App.tsx useAccessibility hook 분리
+  - 리팩토링 후 App.tsx 250줄 이하
+  - as unknown as 캐스트 8개 이하로 축소
+  - 전체 typecheck 8/8 + test 74+/74+ green
+
+metadata:
+  ambiguity_score: 0.05
+  milestone: M-Intent
+  created: 2026-04-16

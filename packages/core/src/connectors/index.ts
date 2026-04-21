@@ -2,4 +2,5 @@ export type { ConnectorConfig, ConnectorResult, DataConnector, ConnectorRegistry
 export { RestConnector } from "./rest-connector.js";
 export { CsvConnector } from "./csv-connector.js";
 export { MockConnector, type MockScenario } from "./mock-connector.js";
+export { WebSocketConnector, type WebSocketConnectorOptions } from "./websocket-connector.js";
 export { DefaultConnectorRegistry } from "./registry.js";

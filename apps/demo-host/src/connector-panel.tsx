@@ -32,18 +32,19 @@ export function ConnectorPanel({ onChange }: ConnectorPanelProps): ReactElement 
   const [list, setList] = useState<UserConnector[]>(() => loadConnectors());
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
-  const [type, setType] = useState<"rest" | "mock">("rest");
+  const [type, setType] = useState<"rest" | "mock" | "websocket">("rest");
   const [refreshMs, setRefreshMs] = useState(5000);
 
   useEffect(() => { onChange(list); }, [list, onChange]);
 
   const add = useCallback(() => {
-    if (!name.trim() || (type === "rest" && !url.trim())) return;
+    const needsUrl = type === "rest" || type === "websocket";
+    if (!name.trim() || (needsUrl && !url.trim())) return;
     const next: UserConnector = {
       id: `user-${Date.now()}`,
       name: name.trim(),
       type,
-      source: type === "rest" ? url.trim() : "sales-kpi",
+      source: needsUrl ? url.trim() : "sales-kpi",
       refreshMs,
       active: true,
       lastStatus: "idle"
@@ -145,15 +146,19 @@ export function ConnectorPanel({ onChange }: ConnectorPanelProps): ReactElement 
         createElement("select", {
           key: "t",
           value: type,
-          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value as "rest" | "mock"),
-          style: { ...inputStyle, width: 70 }
+          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value as "rest" | "mock" | "websocket"),
+          style: { ...inputStyle, width: 90 }
         }, [
           createElement("option", { key: "rest", value: "rest" }, "REST"),
+          createElement("option", { key: "ws", value: "websocket" }, "WebSocket"),
           createElement("option", { key: "mock", value: "mock" }, "Mock")
         ]),
         createElement("input", {
           key: "u",
-          placeholder: type === "rest" ? "https://api..." : "sales-kpi",
+          placeholder:
+            type === "rest" ? "https://api..." :
+            type === "websocket" ? "wss://live..." :
+            "sales-kpi",
           value: url,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value),
           style: { ...inputStyle, flex: 1 }
@@ -177,7 +182,7 @@ export function ConnectorPanel({ onChange }: ConnectorPanelProps): ReactElement 
       createElement("button", {
         key: "add",
         onClick: add,
-        disabled: !name.trim() || (type === "rest" && !url.trim()),
+        disabled: !name.trim() || ((type === "rest" || type === "websocket") && !url.trim()),
         style: {
           padding: "6px 12px",
           borderRadius: 6,
@@ -187,7 +192,7 @@ export function ConnectorPanel({ onChange }: ConnectorPanelProps): ReactElement 
           cursor: "pointer",
           fontSize: 12,
           fontWeight: 600,
-          opacity: (!name.trim() || (type === "rest" && !url.trim())) ? 0.5 : 1
+          opacity: (!name.trim() || ((type === "rest" || type === "websocket") && !url.trim())) ? 0.5 : 1
         }
       }, "+ Add Data Source")
     ])

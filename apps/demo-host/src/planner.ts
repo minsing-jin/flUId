@@ -238,6 +238,7 @@ export class MockPlanner implements Planner {
     const hasTable = /테이블|table|리스트|list|목록|데이터/i.test(lower);
     const hasMap = /지도|map|위치|location|근처|nearby|장소/i.test(lower);
     const hasWeather = /날씨|weather|기온|온도/i.test(lower);
+    const hasSNS = /sns|소셜|social|인스타|instagram|트위터|twitter|유튜브|youtube|틱톡|tiktok|linkedin|링크드인|팔로워|follower/i.test(lower);
 
     // Always add a KPI header
     const kpiItems = [];
@@ -349,6 +350,53 @@ export class MockPlanner implements Planner {
       blocks.push({ id: id(), type: "StatusIndicator", region: "left", props: { label: "API Gateway", status: "ok" } });
       blocks.push({ id: id(), type: "StatusIndicator", region: "left", props: { label: "Database", status: "ok" } });
       blocks.push({ id: id(), type: "StatusIndicator", region: "left", props: { label: "CDN", status: "warning" } });
+    }
+
+    // SNS unified dashboard — issue #1
+    if (hasSNS) {
+      const platform = (name: string, icon: string, handle: string, followers: string, color: string) => ({
+        element: "card", children: [
+          { element: "flex", align: "center", gap: 12, children: [
+            { element: "text", value: icon, style: { fontSize: 32 } },
+            { element: "stack", gap: 2, children: [
+              { element: "text", value: name, style: { fontWeight: 700 } },
+              { element: "text", value: handle, style: { fontSize: 12, color: "var(--genui-muted)" } }
+            ] },
+            { element: "badge", value: followers, color, style: { marginLeft: "auto" } }
+          ] },
+          { element: "divider" },
+          { element: "flex", justify: "space-between", children: [
+            { element: "stack", children: [{ element: "text", value: "Posts", style: { fontSize: 10, color: "var(--genui-muted)" } }, { element: "text", value: "142", style: { fontWeight: 600 } }] },
+            { element: "stack", children: [{ element: "text", value: "Engagement", style: { fontSize: 10, color: "var(--genui-muted)" } }, { element: "text", value: "8.2%", style: { fontWeight: 600 } }] },
+            { element: "stack", children: [{ element: "text", value: "Growth", style: { fontSize: 10, color: "var(--genui-muted)" } }, { element: "text", value: "+12%", style: { fontWeight: 600, color: "#22c55e" } }] }
+          ] }
+        ]
+      });
+      blocks.push({ id: id(), type: "SNSProfileCard", region: "main", props: {
+        children: [
+          { element: "heading", value: "내 소셜 미디어", level: 2 },
+          { element: "grid", columns: 2, children: [
+            platform("Instagram", "📷", "@fluid_user", "12.4K", "#E4405F"),
+            platform("X (Twitter)", "🐦", "@fluid_user", "8.7K", "#000000"),
+            platform("YouTube", "🎬", "@fluid_channel", "45.2K", "#FF0000"),
+            platform("TikTok", "🎵", "@fluid_tok", "3.1K", "#000000"),
+            platform("LinkedIn", "💼", "linkedin.com/in/fluid", "1.2K", "#0A66C2")
+          ] }
+        ]
+      } });
+      blocks.push({ id: id(), type: "SNSAnalytics", region: "right", props: {
+        children: [
+          { element: "heading", value: "이번 주 성과", level: 3 },
+          { element: "stack", gap: 10, children: [
+            { element: "flex", justify: "space-between", children: [{ element: "text", value: "Instagram" }, { element: "progress", percent: 82, height: 6 }] },
+            { element: "flex", justify: "space-between", children: [{ element: "text", value: "YouTube" }, { element: "progress", percent: 68, height: 6 }] },
+            { element: "flex", justify: "space-between", children: [{ element: "text", value: "TikTok" }, { element: "progress", percent: 45, height: 6 }] },
+            { element: "flex", justify: "space-between", children: [{ element: "text", value: "X" }, { element: "progress", percent: 58, height: 6 }] }
+          ] },
+          { element: "divider" },
+          { element: "alert", variant: "success", value: "🔥 YouTube 조회수가 지난 주 대비 28% 증가했어요" }
+        ]
+      } });
     }
 
     // If nothing matched at all, generate a smart summary

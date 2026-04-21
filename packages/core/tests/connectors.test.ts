@@ -89,7 +89,12 @@ test("Registry subscribeTo wires up and unsubscribe cleans up", () => {
 
 test("Registry fetchData returns error for unknown connector type", async () => {
   const reg = new DefaultConnectorRegistry();
-  const result = await reg.fetchData({ id: "x", type: "websocket" as never, source: "ws://localhost" });
+  const result = await reg.fetchData({ id: "x", type: "graphql" as never, source: "https://api" });
   assert.equal(result.data, null);
   assert.match(result.error ?? "", /Unknown connector type/);
+});
+
+test("Registry registers websocket connector", () => {
+  const reg = new DefaultConnectorRegistry();
+  assert.ok(reg.get("websocket"));
 });

@@ -5,6 +5,7 @@ import { plannerResponseSchema } from "../response-schema.js";
 import { buildMessages, inferLocale } from "../prompt-builder.js";
 import { inputFilter, outputStaticCheck } from "../guardrails/index.js";
 import { GuardrailError } from "../types.js";
+import { coerceValidatedPlan } from "../plan-coerce.js";
 import { routeIntent, type IntentResult } from "./intent-router.js";
 import { selectSkills, type SkillSelectionResult } from "./skill-selector.js";
 
@@ -101,7 +102,8 @@ export class MultiAgentPlanner implements Planner {
     for (const skill of skillSelection.selectedSkills) {
       for (const d of skill.allowedDomains ?? []) allowedDomains.push(d.toLowerCase());
     }
-    const staticIssues = outputStaticCheck(parsed.data.uiPlan as unknown as UIPlan, { allowedDomains });
+    const planForCheck = coerceValidatedPlan(parsed.data);
+    const staticIssues = outputStaticCheck(planForCheck, { allowedDomains });
     if (staticIssues.length > 0) throw new GuardrailError(staticIssues);
 
     const tokensTotal = intent.tokensUsed + result.tokensPrompt + result.tokensCompletion;
@@ -112,9 +114,7 @@ export class MultiAgentPlanner implements Planner {
       tokensTotal
     };
 
-    const merged = (parsed.data.theme
-      ? { ...parsed.data.uiPlan, theme: parsed.data.theme }
-      : parsed.data.uiPlan) as unknown as UIPlan;
+    const merged = planForCheck;
 
     return {
       selectedSkills: selectedSkillIds,

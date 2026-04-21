@@ -9,6 +9,7 @@ import { inputFilter, outputStaticCheck, llmJudge } from "./guardrails/index.js"
 import { OpenAIProvider } from "./providers/openai.js";
 import { CostLedger } from "./cost-ledger.js";
 import { ResponseCache, buildCacheKey } from "./response-cache.js";
+import { coerceValidatedPlan } from "./plan-coerce.js";
 import { retryWithBackoff, createRecoveryLedger, type RecoveryEvent } from "./recovery.js";
 import { sendCompletion, type ChatMessage, type FetchLike, type CompletionRequest } from "./transport.js";
 import { zodToJsonSchema } from "./schema-converter.js";
@@ -256,7 +257,7 @@ export class GPTPlanner implements Planner {
     // Stage 3: output static check against allowedDomains and suspicious keys.
     const activeSkills = skillpacks.filter((manifest) => validated.selectedSkills.includes(manifest.id));
     const allowed = allowlistDomains(activeSkills);
-    const planForCheck = validated.uiPlan as unknown as UIPlan;
+    const planForCheck = coerceValidatedPlan(validated);
     const staticIssues: GuardrailIssue[] = outputStaticCheck(planForCheck, {
       allowedDomains: allowed
     });
@@ -292,9 +293,7 @@ export class GPTPlanner implements Planner {
       costSnapshot
     };
 
-    const merged = (validated.theme
-      ? { ...validated.uiPlan, theme: validated.theme }
-      : validated.uiPlan) as unknown as UIPlan;
+    const merged = coerceValidatedPlan(validated);
 
     return {
       selectedSkills: validated.selectedSkills,

@@ -2,6 +2,7 @@ import type { ConnectorConfig, ConnectorRegistry, ConnectorResult, DataConnector
 import { RestConnector } from "./rest-connector.js";
 import { CsvConnector } from "./csv-connector.js";
 import { MockConnector } from "./mock-connector.js";
+import { WebSocketConnector } from "./websocket-connector.js";
 
 export class DefaultConnectorRegistry implements ConnectorRegistry {
   private readonly connectors = new Map<string, DataConnector>();
@@ -11,6 +12,7 @@ export class DefaultConnectorRegistry implements ConnectorRegistry {
     this.register("rest", new RestConnector());
     this.register("csv", new CsvConnector());
     this.register("mock", new MockConnector());
+    this.register("websocket", new WebSocketConnector());
     this.register("static", { type: "static", fetch: async (cfg) => ({
       data: JSON.parse(cfg.source || "null"),
       fetchedAt: new Date().toISOString(),
