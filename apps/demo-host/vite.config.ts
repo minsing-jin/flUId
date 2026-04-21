@@ -14,6 +14,18 @@ export default defineConfig({
       "node:vm": path.resolve(__dirname, "src/stubs/node-vm.ts")
     }
   },
+  build: {
+    target: "es2022",
+    minify: "esbuild",
+    cssMinify: "esbuild",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-dom/client"]
+        }
+      }
+    }
+  },
   server: {
     port: 5173,
     host: "127.0.0.1"
