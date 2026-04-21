@@ -5,11 +5,13 @@ import {
   buildSelfHealMessages,
   inferLocale
 } from "./prompt-builder.js";
-import { inputFilter, outputStaticCheck } from "./guardrails/index.js";
+import { inputFilter, outputStaticCheck, llmJudge } from "./guardrails/index.js";
+import { OpenAIProvider } from "./providers/openai.js";
 import { CostLedger } from "./cost-ledger.js";
 import { ResponseCache, buildCacheKey } from "./response-cache.js";
 import { retryWithBackoff, createRecoveryLedger, type RecoveryEvent } from "./recovery.js";
-import { sendCompletion, type ChatMessage, type FetchLike } from "./transport.js";
+import { sendCompletion, type ChatMessage, type FetchLike, type CompletionRequest } from "./transport.js";
+import { zodToJsonSchema } from "./schema-converter.js";
 import {
   GuardrailError,
   type GPTPlannerConfig,
@@ -141,6 +143,13 @@ export class GPTPlanner implements Planner {
     return response;
   }
 
+  private getResponseFormat(): CompletionRequest["responseFormat"] {
+    if (this.config.useStructuredOutput) {
+      return { type: "json_schema", json_schema: { name: "uiplan", schema: zodToJsonSchema(plannerResponseSchema), strict: true } };
+    }
+    return { type: "json_object" };
+  }
+
   private async runPipeline(
     prompt: string,
     triggerMode: TriggerMode,
@@ -182,7 +191,7 @@ export class GPTPlanner implements Planner {
             temperature: this.config.temperature ?? 0.4,
             maxTokens,
             stream: this.config.stream ?? true,
-            responseFormat: { type: "json_object" }
+            responseFormat: this.getResponseFormat()
           },
           { fetchImpl: this.fetchImpl }
         );
@@ -253,6 +262,17 @@ export class GPTPlanner implements Planner {
     });
     if (staticIssues.length > 0) {
       throw new GuardrailError(staticIssues);
+    }
+
+    // Guardrail layer 5 (optional): LLM-as-judge safety evaluation.
+    if (this.config.enableJudge && this.config.transport.kind === "direct") {
+      const judgeProvider = new OpenAIProvider({ apiKey: this.config.transport.apiKey, baseUrl: this.config.transport.baseUrl });
+      const judgeResult = await llmJudge(planForCheck, judgeProvider, this.config.judgeModel);
+      tokensPromptTotal += Math.floor(judgeResult.tokensUsed / 2);
+      tokensCompletionTotal += Math.ceil(judgeResult.tokensUsed / 2);
+      if (!judgeResult.safe) {
+        throw new GuardrailError([{ layer: "output", code: "JUDGE_UNSAFE", message: judgeResult.reason }]);
+      }
     }
 
     const costSnapshot = this.costLedger.record({

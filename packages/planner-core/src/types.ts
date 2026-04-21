@@ -31,6 +31,12 @@ export interface GPTPlannerConfig {
   temperature?: number;
   /** Fallback planner invoked when GPT pipeline exhausts retries. */
   fallbackPlanner?: Planner;
+  /** Enable 5th defense layer: LLM-as-judge safety evaluation after validation. */
+  enableJudge?: boolean;
+  /** Model to use for judge (cheaper is fine). Default: gpt-4o-mini. */
+  judgeModel?: string;
+  /** Use OpenAI structured output (json_schema) instead of json_object mode. */
+  useStructuredOutput?: boolean;
 }
 
 export interface PlannerContext {

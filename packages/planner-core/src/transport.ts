@@ -11,7 +11,7 @@ export interface CompletionRequest {
   temperature?: number;
   maxTokens?: number;
   stream: boolean;
-  responseFormat?: { type: "json_object" };
+  responseFormat?: { type: "json_object" } | { type: "json_schema"; json_schema: { name: string; schema: Record<string, unknown>; strict: boolean } };
 }
 
 export interface CompletionResult {

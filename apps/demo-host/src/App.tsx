@@ -9,7 +9,7 @@ import {
   type UIPlan,
   type ConnectorResult
 } from "@genui/core";
-import { DefaultReactRenderer, applyTheme, WorkbenchDevTools, type DevToolsData } from "@genui/renderer-react";
+import { DefaultReactRenderer, applyTheme, WorkbenchDevTools, accessibilityCheck, type DevToolsData } from "@genui/renderer-react";
 import { GPTPlanner, type GPTPlannerConfig } from "@genui/planner-core";
 import { BYOKPanel, type BYOKConfig } from "./byok.js";
 import { ConnectorPanel, type UserConnector } from "./connector-panel.js";
@@ -119,6 +119,10 @@ export function App(): ReactElement {
     rendererRef.current = rendererRef.current ?? new DefaultReactRenderer();
     rendererRef.current.renderPlan(plan, runtime, mountRef.current);
     applyTheme(mountRef.current, plan.theme);
+
+    // Run accessibility check on every plan load
+    const issues = accessibilityCheck(plan);
+    setDevData((prev) => ({ ...prev, accessibilityIssues: issues }));
 
     // Subscribe to mock data for live updates
     const connector = connectorRef.current;

@@ -15,6 +15,7 @@ export interface DevToolsData {
   patchDiffs: Array<{ at: string; diff: string }>;
   costTimeline: Array<{ at: string; tokens: number; priceUsd: number; model: string }>;
   recoveryEvents: Array<{ at: string; layer: string; outcome: string; message: string }>;
+  accessibilityIssues?: Array<{ severity: "error" | "warning" | "info"; rule: string; message: string; blockId?: string; suggestion?: string }>;
 }
 
 export interface DevToolsProps {
@@ -23,7 +24,7 @@ export interface DevToolsProps {
   onClose?: () => void;
 }
 
-type TabKey = "request" | "response" | "validation" | "history" | "patches" | "cost" | "recovery";
+type TabKey = "request" | "response" | "validation" | "history" | "patches" | "cost" | "recovery" | "accessibility";
 
 const TAB_LABELS: Record<TabKey, string> = {
   request: "Request",
@@ -32,7 +33,8 @@ const TAB_LABELS: Record<TabKey, string> = {
   history: "Plan History",
   patches: "Patches",
   cost: "Cost",
-  recovery: "Recovery"
+  recovery: "Recovery",
+  accessibility: "A11y"
 };
 
 export function WorkbenchDevTools(props: DevToolsProps): ReactElement | null {
@@ -232,5 +234,22 @@ function renderTabBody(tab: TabKey, data: DevToolsData): ReactElement | ReactEle
               ]
             )
           );
+    case "accessibility": {
+      const issues = data.accessibilityIssues ?? [];
+      if (issues.length === 0) return pre("No accessibility issues detected");
+      const severityColor = (s: string): string =>
+        s === "error" ? "#ef4444" : s === "warning" ? "#f59e0b" : "#3b82f6";
+      return issues.map((issue, index) =>
+        createElement("div", { key: index, style: { borderBottom: "1px solid #1e293b", padding: "6px 0" } }, [
+          createElement("div", { key: "h", style: { display: "flex", gap: 8 } }, [
+            createElement("span", { key: "s", style: { color: severityColor(issue.severity), fontWeight: 700, textTransform: "uppercase", fontSize: 10 } }, issue.severity),
+            createElement("span", { key: "r", style: { color: "#94a3b8", fontSize: 11 } }, issue.rule),
+            issue.blockId ? createElement("span", { key: "b", style: { color: "#64748b", fontSize: 10 } }, `· ${issue.blockId}`) : null
+          ]),
+          createElement("div", { key: "m", style: { color: "#cbd5e1", fontSize: 12, marginTop: 2 } }, issue.message),
+          issue.suggestion ? createElement("div", { key: "sg", style: { color: "#64748b", fontSize: 11, marginTop: 2, fontStyle: "italic" } }, `💡 ${issue.suggestion}`) : null
+        ])
+      );
+    }
   }
 }
