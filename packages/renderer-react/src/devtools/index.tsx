@@ -38,9 +38,8 @@ const TAB_LABELS: Record<TabKey, string> = {
 };
 
 export function WorkbenchDevTools(props: DevToolsProps): ReactElement | null {
+  // All hooks MUST be called unconditionally before any early return (Rules of Hooks)
   const [tab, setTab] = useState<TabKey>("request");
-  if (props.visible === false) return null;
-
   const totalCost = useMemo(
     () => props.data.costTimeline.reduce((acc, entry) => acc + entry.priceUsd, 0),
     [props.data.costTimeline]
@@ -49,6 +48,8 @@ export function WorkbenchDevTools(props: DevToolsProps): ReactElement | null {
     () => props.data.costTimeline.reduce((acc, entry) => acc + entry.tokens, 0),
     [props.data.costTimeline]
   );
+
+  if (props.visible === false) return null;
 
   return createElement(
     "aside",
