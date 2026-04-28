@@ -239,6 +239,7 @@ export class MockPlanner implements Planner {
     const hasMap = /지도|map|위치|location|근처|nearby|장소/i.test(lower);
     const hasWeather = /날씨|weather|기온|온도/i.test(lower);
     const hasSNS = /sns|소셜|social|인스타|instagram|트위터|twitter|유튜브|youtube|틱톡|tiktok|linkedin|링크드인|팔로워|follower/i.test(lower);
+    const hasPresentation = /발표|프레젠테이션|ppt|슬라이드|presentation|slide|deck|키노트|keynote/i.test(lower);
 
     // Always add a KPI header
     const kpiItems = [];
@@ -397,6 +398,172 @@ export class MockPlanner implements Planner {
           { element: "alert", variant: "success", value: "🔥 YouTube 조회수가 지난 주 대비 28% 증가했어요" }
         ]
       } });
+    }
+
+    // Presentation / dynamic deck — issue: next-gen PPT alternative
+    if (hasPresentation) {
+      // Clear other blocks — presentation takes the whole stage
+      blocks.length = 0;
+      const accent = "var(--genui-accent)";
+      const muted = "var(--genui-muted)";
+
+      const titleSlide = {
+        element: "slide",
+        title: prompt.length > 60 ? prompt.slice(0, 57) + "..." : prompt,
+        subtitle: "Generated with flUId · Dynamic Presentation",
+        background: `linear-gradient(135deg, var(--genui-bg) 0%, ${accent} 200%)`,
+        children: [
+          { element: "spacer", height: 40 },
+          { element: "animate", kind: "scale", delay: 200, children: [
+            { element: "flex", justify: "center", align: "center", gap: 24, children: [
+              { element: "text", value: "🎯", style: { fontSize: 96 } },
+              { element: "stack", gap: 8, children: [
+                { element: "text", value: "Static slides are dead.", style: { fontSize: 36, fontWeight: 800 } },
+                { element: "text", value: "Long live dynamic web decks.", style: { fontSize: 22, color: muted } }
+              ] }
+            ] }
+          ] },
+          { element: "spacer", height: 40 },
+          { element: "animate", kind: "fade", delay: 600, children: [
+            { element: "flex", justify: "center", gap: 16, children: [
+              { element: "badge", value: "← / →  navigate", color: muted },
+              { element: "badge", value: "F  fullscreen", color: muted },
+              { element: "badge", value: "E  edit JSON", color: muted }
+            ] }
+          ] }
+        ]
+      };
+
+      const philosophySlide = {
+        element: "slide",
+        title: "Why dynamic > static?",
+        children: [
+          { element: "grid", columns: 3, children: [
+            { element: "animate", kind: "slide-up", delay: 0, children: [
+              { element: "card", children: [
+                { element: "text", value: "🎬", style: { fontSize: 48 } },
+                { element: "heading", value: "Animation", level: 3 },
+                { element: "text", value: "Built-in entrance, transitions, parallax — not GIF embedding.", style: { color: muted } }
+              ] }
+            ] },
+            { element: "animate", kind: "slide-up", delay: 150, children: [
+              { element: "card", children: [
+                { element: "text", value: "✏️", style: { fontSize: 48 } },
+                { element: "heading", value: "Live Edit", level: 3 },
+                { element: "text", value: "Press E to edit slide JSON inline. Changes apply instantly.", style: { color: muted } }
+              ] }
+            ] },
+            { element: "animate", kind: "slide-up", delay: 300, children: [
+              { element: "card", children: [
+                { element: "text", value: "🔌", style: { fontSize: 48 } },
+                { element: "heading", value: "Live Data", level: 3 },
+                { element: "text", value: "Connect real APIs. KPIs update during the talk.", style: { color: muted } }
+              ] }
+            ] }
+          ] }
+        ]
+      };
+
+      const interactiveSlide = {
+        element: "slide",
+        title: "Interactive components",
+        subtitle: "이 슬라이드 자체가 인터랙티브합니다",
+        children: [
+          { element: "grid", columns: 2, children: [
+            { element: "animate", kind: "slide-right", children: [
+              { element: "card", children: [
+                { element: "heading", value: "Live Demo", level: 3 },
+                { element: "text", value: "버튼을 누르면 다음 슬라이드로 이동합니다", style: { color: muted } },
+                { element: "spacer", height: 16 },
+                { element: "flex", gap: 8, children: [
+                  { element: "button", value: "Vote A", color: "#3b82f6" },
+                  { element: "button", value: "Vote B", color: "#22c55e" },
+                  { element: "button", value: "Vote C", color: "#f59e0b" }
+                ] }
+              ] }
+            ] },
+            { element: "animate", kind: "slide-left", delay: 200, children: [
+              { element: "card", children: [
+                { element: "heading", value: "Live Stats", level: 3 },
+                { element: "stack", gap: 8, children: [
+                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option A" }, { element: "progress", percent: 65, height: 8 }] },
+                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option B" }, { element: "progress", percent: 24, height: 8 }] },
+                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option C" }, { element: "progress", percent: 11, height: 8 }] }
+                ] }
+              ] }
+            ] }
+          ] }
+        ]
+      };
+
+      const dataSlide = {
+        element: "slide",
+        title: "Real-time data, not screenshots",
+        children: [
+          { element: "animate", kind: "fade", children: [
+            { element: "grid", columns: 4, children: [
+              { element: "card", children: [
+                { element: "text", value: "$1.24M", style: { fontSize: 32, fontWeight: 700, color: accent } },
+                { element: "text", value: "Revenue (live)", style: { fontSize: 12, color: muted } }
+              ] },
+              { element: "card", children: [
+                { element: "text", value: "8,420", style: { fontSize: 32, fontWeight: 700, color: accent } },
+                { element: "text", value: "Active Users", style: { fontSize: 12, color: muted } }
+              ] },
+              { element: "card", children: [
+                { element: "text", value: "+18%", style: { fontSize: 32, fontWeight: 700, color: "#22c55e" } },
+                { element: "text", value: "Growth WoW", style: { fontSize: 12, color: muted } }
+              ] },
+              { element: "card", children: [
+                { element: "text", value: "99.97%", style: { fontSize: 32, fontWeight: 700, color: accent } },
+                { element: "text", value: "Uptime", style: { fontSize: 12, color: muted } }
+              ] }
+            ] }
+          ] },
+          { element: "spacer", height: 24 },
+          { element: "animate", kind: "slide-up", delay: 300, children: [
+            { element: "alert", variant: "info", value: "이 숫자들은 시연 중에도 자동으로 업데이트됩니다 (Mock 시나리오 sales-kpi)" }
+          ] }
+        ]
+      };
+
+      const closingSlide = {
+        element: "slide",
+        title: "Try it yourself",
+        background: `linear-gradient(135deg, ${accent} 0%, var(--genui-bg) 100%)`,
+        children: [
+          { element: "spacer", height: 40 },
+          { element: "animate", kind: "bounce", children: [
+            { element: "stack", align: "center", gap: 16, children: [
+              { element: "text", value: "✨", style: { fontSize: 80, textAlign: "center" } },
+              { element: "heading", value: "다음 시도", level: 2 },
+              { element: "stack", gap: 6, children: [
+                { element: "text", value: "• 프롬프트에 \"애니메이션 있는 발표자료\"" },
+                { element: "text", value: "• \"Q4 결과 발표 슬라이드 5장\"" },
+                { element: "text", value: "• \"마케팅 캠페인 키노트\"" },
+                { element: "text", value: "• 또는 본인이 원하는 어떤 발표 주제든" }
+              ] }
+            ] }
+          ] }
+        ]
+      };
+
+      blocks.push({
+        id: id(),
+        type: "DynamicDeck",
+        region: "main",
+        props: {
+          children: [{
+            element: "slidedeck",
+            children: [titleSlide, philosophySlide, interactiveSlide, dataSlide, closingSlide]
+          }]
+        }
+      });
+
+      return {
+        ...basePlan(prompt.slice(0, 50), "custom", blocks),
+        theme: { mood: "vivid", density: "spacious", accent: "indigo" }
+      };
     }
 
     // If nothing matched at all, generate a smart summary

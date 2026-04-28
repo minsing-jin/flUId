@@ -233,3 +233,59 @@ input:focus, textarea:focus {
   border-radius: var(--genui-radius-sm);
   padding: calc(4px * var(--genui-spacing)) calc(12px * var(--genui-spacing));
 }
+
+/* ── Presentation slide entrance ── */
+@keyframes genui-slide-enter-kf {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.genui-slide-enter {
+  animation: genui-slide-enter-kf 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Animate primitive: 8 named entrances ── */
+@keyframes genui-fade-kf { from { opacity: 0; } to { opacity: 1; } }
+.genui-anim-fade { animation: genui-fade-kf 0.6s ease-out both; }
+
+@keyframes genui-slide-up-kf {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.genui-anim-slide-up { animation: genui-slide-up-kf 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes genui-slide-down-kf {
+  from { opacity: 0; transform: translateY(-24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.genui-anim-slide-down { animation: genui-slide-down-kf 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes genui-slide-left-kf {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.genui-anim-slide-left { animation: genui-slide-left-kf 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes genui-slide-right-kf {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.genui-anim-slide-right { animation: genui-slide-right-kf 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes genui-scale-kf {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+.genui-anim-scale { animation: genui-scale-kf 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes genui-bounce-kf {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.genui-anim-bounce { animation: genui-bounce-kf 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes genui-blur-kf {
+  from { opacity: 0; filter: blur(12px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.genui-anim-blur { animation: genui-blur-kf 0.7s ease-out both; }

@@ -1,4 +1,4 @@
-import { createElement, useState, useCallback, type ReactElement } from "react";
+import { createElement, useState, useCallback, useEffect, useRef, type ReactElement } from "react";
 
 /**
  * A declarative UI node that GPT can compose freely.
@@ -134,6 +134,196 @@ const s = (base: React.CSSProperties, custom?: Record<string, string | number>):
   ...base,
   ...(custom as React.CSSProperties)
 });
+
+/**
+ * SlideDeck — stateful slide presenter.
+ * - Children are slides (any DeclNode, typically `slide` or `card`).
+ * - Arrow keys ←/→ navigate, F toggles fullscreen, E toggles edit mode.
+ * - Click indicator dots to jump.
+ */
+function SlideDeck(props: { children: DeclNode[]; autoPlay?: boolean; intervalMs?: number }): ReactElement {
+  const slides = props.children ?? [];
+  const [index, setIndex] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const total = slides.length;
+  const safeIndex = Math.max(0, Math.min(total - 1, index));
+
+  const prev = useCallback(() => setIndex((i) => (i > 0 ? i - 1 : total - 1)), [total]);
+  const next = useCallback(() => setIndex((i) => (i < total - 1 ? i + 1 : 0)), [total]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent): void {
+      const tag = (e.target as HTMLElement | null)?.tagName ?? "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+      else if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); next(); }
+      else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        setFullscreen((f) => !f);
+      } else if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        setEditMode((m) => !m);
+      } else if (e.key === "Escape") {
+        setFullscreen(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [prev, next]);
+
+  // Auto play
+  useEffect(() => {
+    if (!props.autoPlay) return;
+    const ms = num(props.intervalMs, 6000);
+    const id = setInterval(next, ms);
+    return () => clearInterval(id);
+  }, [props.autoPlay, props.intervalMs, next]);
+
+  if (total === 0) {
+    return createElement("div", {
+      style: { padding: 24, color: "var(--genui-muted)", textAlign: "center", border: "2px dashed var(--genui-border)", borderRadius: 12 }
+    }, "(empty slide deck)");
+  }
+
+  const containerStyle: React.CSSProperties = fullscreen
+    ? {
+        position: "fixed", inset: 0, zIndex: 9000,
+        background: "var(--genui-bg, #fff)",
+        display: "flex", flexDirection: "column"
+      }
+    : {
+        position: "relative",
+        background: "var(--genui-bg, #fff)",
+        border: "1px solid var(--genui-border, #e2e8f0)",
+        borderRadius: "var(--genui-radius, 12px)",
+        boxShadow: "var(--genui-shadow-md)",
+        overflow: "hidden",
+        minHeight: 360
+      };
+
+  const slideAreaStyle: React.CSSProperties = {
+    flex: 1,
+    display: "flex",
+    alignItems: "stretch",
+    justifyContent: "stretch",
+    padding: fullscreen ? 0 : 0,
+    minHeight: fullscreen ? "calc(100vh - 60px)" : 360,
+    position: "relative"
+  };
+
+  const slide = slides[safeIndex];
+
+  return createElement("div", { ref: containerRef, style: containerStyle, tabIndex: 0 }, [
+    /* Slide content with key={safeIndex} so it remounts and re-runs entrance animation */
+    createElement("div", {
+      key: `slide-area-${safeIndex}`,
+      style: slideAreaStyle,
+      className: "genui-slide-enter"
+    }, slide ? renderNode(slide, safeIndex) : null),
+
+    /* Edit overlay */
+    editMode ? createElement("div", {
+      key: "edit-banner",
+      style: {
+        position: "absolute", top: 8, left: 8, padding: "4px 10px",
+        background: "var(--genui-accent)", color: "var(--genui-accent-fg)",
+        borderRadius: 6, fontSize: 11, fontWeight: 700
+      }
+    }, "EDIT MODE — JSON 노출 (E to exit)") : null,
+
+    /* Bottom bar */
+    createElement("div", {
+      key: "bar",
+      style: {
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 16px",
+        borderTop: "1px solid var(--genui-border)",
+        background: "var(--genui-bg-secondary, #f8fafc)",
+        gap: 12
+      }
+    }, [
+      createElement("button", {
+        key: "prev", onClick: prev,
+        style: deckBtnStyle()
+      }, "‹"),
+      createElement("div", {
+        key: "dots",
+        style: { display: "flex", gap: 6, flex: 1, justifyContent: "center" }
+      }, slides.map((_, i) => createElement("button", {
+        key: i,
+        onClick: () => setIndex(i),
+        "aria-label": `Slide ${i + 1}`,
+        style: {
+          width: i === safeIndex ? 24 : 8,
+          height: 8,
+          borderRadius: 4,
+          border: "none",
+          background: i === safeIndex ? "var(--genui-accent)" : "var(--genui-border)",
+          cursor: "pointer",
+          transition: "all 200ms"
+        }
+      }))),
+      createElement("span", {
+        key: "count",
+        style: { fontSize: 11, color: "var(--genui-muted)", minWidth: 50, textAlign: "right" }
+      }, `${safeIndex + 1} / ${total}`),
+      createElement("button", {
+        key: "next", onClick: next,
+        style: deckBtnStyle()
+      }, "›"),
+      createElement("button", {
+        key: "fs", onClick: () => setFullscreen((f) => !f),
+        title: "Fullscreen (F)",
+        style: deckBtnStyle()
+      }, fullscreen ? "⊠" : "⛶"),
+      createElement("button", {
+        key: "edit", onClick: () => setEditMode((m) => !m),
+        title: "Edit mode (E)",
+        style: deckBtnStyle(editMode)
+      }, "✎")
+    ]),
+
+    /* Edit JSON view */
+    editMode && slide ? createElement("pre", {
+      key: "json",
+      style: {
+        position: "absolute", right: 8, top: 40, bottom: 60,
+        width: 320, padding: 12,
+        background: "rgba(15, 23, 42, 0.96)", color: "#cbd5e1",
+        borderRadius: 8, fontSize: 11, overflow: "auto",
+        whiteSpace: "pre-wrap", wordBreak: "break-word"
+      }
+    }, JSON.stringify(slide, null, 2)) : null
+  ]);
+}
+
+function deckBtnStyle(active = false): React.CSSProperties {
+  return {
+    width: 32, height: 32,
+    border: "1px solid var(--genui-border)",
+    borderRadius: 8,
+    background: active ? "var(--genui-accent)" : "var(--genui-bg)",
+    color: active ? "var(--genui-accent-fg)" : "var(--genui-fg)",
+    cursor: "pointer",
+    fontSize: 16,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "all 150ms"
+  };
+}
+
+const ANIM_MAP: Record<string, string> = {
+  "fade": "genui-anim-fade",
+  "slide-up": "genui-anim-slide-up",
+  "slide-down": "genui-anim-slide-down",
+  "slide-left": "genui-anim-slide-left",
+  "slide-right": "genui-anim-slide-right",
+  "scale": "genui-anim-scale",
+  "bounce": "genui-anim-bounce",
+  "blur": "genui-anim-blur"
+};
 
 /**
  * Render a single declarative node to a React element.
@@ -398,6 +588,60 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
     case "box":
       return renderLayoutChildren(node.element, node.children, s({}, custom));
 
+    /* ── Presentation: SlideDeck ── */
+    case "slidedeck":
+      return createElement(SlideDeck, {
+        key,
+        children: node.children ?? [],
+        autoPlay: node.autoPlay === true,
+        intervalMs: num(node.intervalMs, 6000)
+      });
+
+    /* ── Slide — visual container with title + body ── */
+    case "slide": {
+      const titleVal = str(node.title);
+      const bgGradient = str(node.background, "linear-gradient(135deg, var(--genui-bg) 0%, var(--genui-bg-secondary, #f1f5f9) 100%)");
+      return createElement("article", { key, style: s({
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: "calc(16px * var(--genui-spacing, 1))",
+        padding: "calc(48px * var(--genui-spacing, 1))",
+        background: bgGradient,
+        color: "var(--genui-fg)",
+        position: "relative",
+        overflow: "auto"
+      }, custom) }, [
+        titleVal ? createElement("h2", {
+          key: "title",
+          style: { margin: 0, fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em", color: "var(--genui-fg)" }
+        }, titleVal) : null,
+        node.subtitle ? createElement("div", {
+          key: "sub",
+          style: { fontSize: 16, color: "var(--genui-muted)", marginTop: -8 }
+        }, str(node.subtitle)) : null,
+        createElement("div", {
+          key: "body",
+          style: { display: "flex", flexDirection: "column", gap: 12, flex: 1 }
+        }, kids)
+      ]);
+    }
+
+    /* ── Animate — entrance animation wrapper ── */
+    case "animate": {
+      const kind = str(node.kind, "fade");
+      const cls = ANIM_MAP[kind] ?? ANIM_MAP.fade;
+      const delay = num(node.delay, 0);
+      return createElement("div", {
+        key,
+        className: cls,
+        style: s({
+          animationDelay: `${delay}ms`,
+          animationFillMode: "both"
+        }, custom)
+      }, kids);
+    }
+
     /* ── Unknown → safe fallback ── */
     default:
       return createElement("div", { key, style: s({
@@ -453,5 +697,6 @@ export const GENERIC_PRIMITIVES = [
   "card", "grid", "flex", "stack", "container", "section", "box",
   "badge", "progress", "image", "divider", "spacer", "alert",
   "button", "input", "link", "select",
-  "list", "table"
+  "list", "table",
+  "slidedeck", "slide", "animate"
 ] as const;
