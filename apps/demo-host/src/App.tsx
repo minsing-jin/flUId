@@ -285,14 +285,27 @@ export function App(): ReactElement {
 
         createElement(
           "div",
-          { key: "toggle", style: { display: "flex", gap: 6 } },
+          { key: "toggle", style: { display: "flex", gap: 6, flexWrap: "wrap" } },
           [
             createElement("button", {
               key: "dev",
               onClick: () => setDevVisible((v) => !v),
               style: toggleBtn
             }, devVisible ? "Hide DevTools" : "Show DevTools"),
-            createElement("span", { key: "status", style: { fontSize: 11, color: "#64748b" } }, status)
+            createElement("button", {
+              key: "export",
+              onClick: () => {
+                if (typeof window !== "undefined") {
+                  // Hide sidebar + devtools at print time via a class; main area prints
+                  document.body.classList.add("genui-print-mode");
+                  window.print();
+                  setTimeout(() => document.body.classList.remove("genui-print-mode"), 500);
+                }
+              },
+              title: "Export current view as PDF (browser print → save as PDF)",
+              style: toggleBtn
+            }, "Export PDF"),
+            createElement("span", { key: "status", style: { fontSize: 11, color: "#64748b", flexBasis: "100%" } }, status)
           ]
         )
       ]

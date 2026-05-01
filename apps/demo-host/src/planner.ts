@@ -466,32 +466,19 @@ export class MockPlanner implements Planner {
 
       const interactiveSlide = {
         element: "slide",
-        title: "Interactive components",
-        subtitle: "이 슬라이드 자체가 인터랙티브합니다",
+        title: "Live audience poll",
+        subtitle: "이 슬라이드를 보는 청중이 직접 투표할 수 있어요",
         children: [
-          { element: "grid", columns: 2, children: [
-            { element: "animate", kind: "slide-right", children: [
-              { element: "card", children: [
-                { element: "heading", value: "Live Demo", level: 3 },
-                { element: "text", value: "버튼을 누르면 다음 슬라이드로 이동합니다", style: { color: muted } },
-                { element: "spacer", height: 16 },
-                { element: "flex", gap: 8, children: [
-                  { element: "button", value: "Vote A", color: "#3b82f6" },
-                  { element: "button", value: "Vote B", color: "#22c55e" },
-                  { element: "button", value: "Vote C", color: "#f59e0b" }
-                ] }
-              ] }
-            ] },
-            { element: "animate", kind: "slide-left", delay: 200, children: [
-              { element: "card", children: [
-                { element: "heading", value: "Live Stats", level: 3 },
-                { element: "stack", gap: 8, children: [
-                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option A" }, { element: "progress", percent: 65, height: 8 }] },
-                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option B" }, { element: "progress", percent: 24, height: 8 }] },
-                  { element: "flex", justify: "space-between", children: [{ element: "text", value: "Option C" }, { element: "progress", percent: 11, height: 8 }] }
-                ] }
-              ] }
-            ] }
+          { element: "animate", kind: "scale", children: [
+            { element: "poll",
+              question: "Which feature should we ship next?",
+              options: [
+                { label: "🎬 More animation presets", color: "#8b5cf6", initialVotes: 24 },
+                { label: "🔌 Real-time WebSocket data", color: "#3b82f6", initialVotes: 18 },
+                { label: "📤 PPTX export", color: "#22c55e", initialVotes: 31 },
+                { label: "🎨 Custom theme builder", color: "#f59e0b", initialVotes: 9 }
+              ]
+            }
           ] }
         ]
       };

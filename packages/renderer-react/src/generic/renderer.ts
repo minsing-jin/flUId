@@ -326,6 +326,102 @@ const ANIM_MAP: Record<string, string> = {
 };
 
 /**
+ * LivePoll — interactive vote widget with optimistic UI updates.
+ * Children/options can be string array or { label, color } records.
+ * Clicking an option immediately bumps its count and recomputes percentages.
+ */
+function LivePoll(props: {
+  question?: string;
+  options: Array<string | { label: string; color?: string; initialVotes?: number }>;
+  allowMulti?: boolean;
+}): ReactElement {
+  const normalizedOptions = props.options.map((opt) =>
+    typeof opt === "string" ? { label: opt, color: undefined as string | undefined, initialVotes: 0 } : { label: opt.label, color: opt.color, initialVotes: opt.initialVotes ?? 0 }
+  );
+  const [votes, setVotes] = useState<number[]>(normalizedOptions.map((o) => o.initialVotes ?? 0));
+  const [picked, setPicked] = useState<Set<number>>(new Set());
+
+  const total = votes.reduce((a, b) => a + b, 0);
+
+  const onVote = useCallback((idx: number) => {
+    if (picked.has(idx) && !props.allowMulti) return;
+    setVotes((v) => v.map((x, i) => i === idx ? x + 1 : x));
+    setPicked((p) => {
+      if (props.allowMulti) {
+        const next = new Set(p);
+        next.add(idx);
+        return next;
+      }
+      return new Set([idx]);
+    });
+    globalThis.dispatchEvent?.(new CustomEvent("genui:action", {
+      detail: { action: "poll.vote", payload: { option: normalizedOptions[idx]?.label, index: idx }, source: "poll" }
+    }));
+  }, [picked, props.allowMulti, normalizedOptions]);
+
+  return createElement("div", {
+    style: {
+      padding: "calc(16px * var(--genui-spacing, 1))",
+      background: "var(--genui-bg, #fff)",
+      border: "1px solid var(--genui-border, #e2e8f0)",
+      borderRadius: "var(--genui-radius, 12px)",
+      display: "flex", flexDirection: "column", gap: 12
+    }
+  }, [
+    props.question ? createElement("div", {
+      key: "q", style: { fontWeight: 600, fontSize: 15 }
+    }, props.question) : null,
+    createElement("div", {
+      key: "opts", style: { display: "flex", flexDirection: "column", gap: 8 }
+    }, normalizedOptions.map((opt, i) => {
+      const pct = total === 0 ? 0 : Math.round((votes[i] ?? 0) / total * 100);
+      const isPicked = picked.has(i);
+      return createElement("button", {
+        key: i,
+        onClick: () => onVote(i),
+        style: {
+          padding: "10px 14px",
+          textAlign: "left",
+          border: isPicked ? `2px solid ${opt.color ?? "var(--genui-accent, #4f46e5)"}` : "1px solid var(--genui-border, #e2e8f0)",
+          borderRadius: 8,
+          background: "var(--genui-bg, #fff)",
+          cursor: "pointer",
+          position: "relative",
+          overflow: "hidden",
+          fontFamily: "inherit",
+          fontSize: 14,
+          color: "var(--genui-fg)",
+          transition: "all 200ms cubic-bezier(0.4,0,0.2,1)"
+        }
+      }, [
+        createElement("div", {
+          key: "fill",
+          style: {
+            position: "absolute", inset: 0,
+            background: opt.color ?? "var(--genui-accent, #4f46e5)",
+            opacity: 0.12,
+            width: `${pct}%`,
+            transition: "width 350ms cubic-bezier(0.16,1,0.3,1)"
+          }
+        }),
+        createElement("div", {
+          key: "row",
+          style: { position: "relative", display: "flex", justifyContent: "space-between", alignItems: "center" }
+        }, [
+          createElement("span", { key: "l" }, opt.label),
+          createElement("span", { key: "r", style: { fontSize: 12, color: "var(--genui-muted)", fontWeight: 600 } },
+            `${votes[i] ?? 0} · ${pct}%`
+          )
+        ])
+      ]);
+    })),
+    createElement("div", {
+      key: "total", style: { fontSize: 11, color: "var(--genui-muted)", textAlign: "right" }
+    }, `${total} ${total === 1 ? "vote" : "votes"}`)
+  ]);
+}
+
+/**
  * Render a single declarative node to a React element.
  * This is the heart of the Generic Declarative Renderer.
  */
@@ -642,6 +738,17 @@ export function renderNode(node: DeclNode, key: number | string = 0): ReactEleme
       }, kids);
     }
 
+    /* ── Live Poll — interactive vote with optimistic UI ── */
+    case "poll": {
+      const opts = Array.isArray(node.options) ? node.options as Array<string | { label: string; color?: string; initialVotes?: number }> : [];
+      return createElement(LivePoll, {
+        key,
+        question: str(node.question),
+        options: opts,
+        allowMulti: node.allowMulti === true
+      });
+    }
+
     /* ── Unknown → safe fallback ── */
     default:
       return createElement("div", { key, style: s({
@@ -698,5 +805,5 @@ export const GENERIC_PRIMITIVES = [
   "badge", "progress", "image", "divider", "spacer", "alert",
   "button", "input", "link", "select",
   "list", "table",
-  "slidedeck", "slide", "animate"
+  "slidedeck", "slide", "animate", "poll"
 ] as const;

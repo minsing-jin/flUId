@@ -289,3 +289,33 @@ input:focus, textarea:focus {
   to { opacity: 1; filter: blur(0); }
 }
 .genui-anim-blur { animation: genui-blur-kf 0.7s ease-out both; }
+
+/* ── Print mode: hide chrome, show only the rendered workbench ── */
+@media print {
+  body { background: white !important; }
+  aside, .genui-devtools, .genui-loading-bar { display: none !important; }
+  main.genui-react-workbench {
+    display: block !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  main.genui-react-workbench > section {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    margin-bottom: 16px;
+    animation: none !important;
+  }
+  .genui-anim-fade, .genui-anim-slide-up, .genui-anim-slide-down,
+  .genui-anim-slide-left, .genui-anim-slide-right, .genui-anim-scale,
+  .genui-anim-bounce, .genui-anim-blur, .genui-slide-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+body.genui-print-mode aside,
+body.genui-print-mode .genui-devtools {
+  display: none !important;
+}

@@ -123,6 +123,30 @@ Design guidance:
 - Pick a mood that matches the register (serious for finance/ops, playful for personal/weekend, minimal for focus, vivid for marketing, dark for night dashboards).
 - density reflects information density — dashboards with many KPIs prefer 'compact', single-task flows prefer 'spacious'.
 - Include at least one rationale sentence so humans can inspect your visual decision.
+
+# UX Rules (always follow)
+- One screen, one biggest number. Never two equal-sized "most important" things competing.
+- Use only 4 text sizes: Hero (32-48px), Heading (18-24px), Body (13-15px), Meta (10-12px). Do not invent in-between sizes.
+- Accent color appears 3-5 times maximum per screen. Don't paint everything accent.
+- Spacing in 4-multiples (4/8/12/16/24/32/48/64). Card-gap >= card-padding (so cards visually separate).
+- Animations 200-600ms only. Stagger 80-150ms gap between items. Max 8 staggered items, then group.
+- Easing: cubic-bezier(0.16, 1, 0.3, 1) for entrance, cubic-bezier(0.4, 0, 0.2, 1) for hover. Never linear.
+- Buttons say verb+object ("Save key", "Generate UI"), not just "OK" or "Submit".
+- Toggle/poll updates UI optimistically — don't wait for round-trip.
+- Empty states are designed: friendly icon (emoji OK) + one-line reason + next-action button. Never blank.
+- Mock data must look real ($1.24M, "@brand", concrete names). Never "Lorem ipsum" or "foo bar".
+- Errors include: what failed + what user does next + whether auto-recovered. Not "An error occurred".
+- Color-only meaning is forbidden. Status uses dot + text label. Charts have ariaLabel or title.
+
+# Presentation / Slide Rules (when prompt mentions presentation, slides, deck, PPT, keynote, 발표, 프레젠테이션)
+- Use slidedeck primitive wrapping multiple slide children.
+- One message per slide. Don't pack two ideas into one.
+- Hero/title slide: <= 12 words of text, big emoji or icon, big number if applicable.
+- Data slide: 4 KPIs OR 1 chart, not both. Split into more slides if needed.
+- Each slide uses ONE animation kind for its children (don't mix fade+slide+bounce).
+- Use animate primitive with staggered delay for slide content (0, 150, 300, 450ms).
+- 5-7 slides per deck is ideal. 10+ is too long.
+- Closing slide always has a clear next-action (CTA button or contact).
 `;
 }
 
